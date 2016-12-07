@@ -1,0 +1,129 @@
+STD C :
+
+malloc(size) alloue la mémoire et renvoie un pointeur dessus (void*).
+free(truc) le détruit (i.e. le marque libre pour l'OS).
+memset(string s, char c, int n) copie c dans les n premiers caractères de s.
+memcpy(string s1, string s2, int n) copie les n premiers caractères de s2 dans s1.
+
+union nom { members } var définit une variable var de type nom, qui est un l'un des members (seul l'un des members peut-être non nul à un instant donné, car tout est stocké au même emplacement mémoire).
+
+
+minilisp.h :
+
+Un jit_word_t est un entier non signé sur 64 bits. Un tag_t aussi.
+
+Le type Cell a l'air d'être un genre de liste chaînée, probablement pour représenter les listes du Lisp, avec un champ value dont on ne comprend pas bien l'utilité (peut-être que c'est pour représenter les atomes de la liste). On a donc :
+ - la tête (ar), composée d'une valeur (un word) ou d'une adresse (pointeur sur des données).
+ - la suite (dr), composée d'une taille (un word) ou d'un pointeur sur des données next.
+ - un tag (qui est un word, appremment dit le type, genre CONS, LET, STREAM..., définis avec des #define). Le tag définit quel élément de ar ou dr est utilisé. TAG_MARK (qui peut-être combiné avec les autres tags) signifie que la cell est libre il semblerait.
+Note : pour connaître la structure de chaque cell (en fonction du TAG), aller voir alloc.c est pas mal (initialisation des champs).
+
+Une env_entry est un programme (sans doute), avec un nom et une Cell.
+
+car(cell) renvoie l'adresse (une autre Cell) de l'élément en tête de liste, et cdr(cell) la suite (une autre Cell).
+
+
+strmap.h / strmap.c : (ça se voit que c'est pas lui qui l'a écrit, c'est documenté...)
+
+Une StrMap est une hash table dont les clés sont des strings. Il y a les fonctions standard de création (sm_new), suppression (sm_delete), accès (sm_get), existence (sm_exists), ajout (sm_put, remplace si la clé était déjà associée), comptage de clés (sm_get_count) et itération (sm_enum) qui prend un pointeur sur une fonction à appeler sur chaque paire (clé, valeur).
+
+Implémentation : table de hachage standard, le nombre de clés est sauvegardé partout. A noter que la suppression de la tabe ne libère pas les valeurs stockées, seulement les string allouées pour les clés (peut-être lui qui a commenté la ligne correspondante (97)). La fonction de hachage est de la magie C standard avec un genre de Hölder et des nombres premiers (itérer h = a * h + b).
+
+
+alloc.h / alloc.c :
+
+Un env_t est une StrMap (environnement)
+Un cell_allocator_t est un type somme CA_STACK | CA_HEAP
+Une MemStats contient le nombre de cells utilisées / max (stockées sur le cell_heap) et le nombre d'octets du tas utilisés / max (jusqu'ici je pense, rien à voir avec une limite système).
+oom_cell est une cell prédéfinie qui représente l'erreur ERR_OUT_OF_MEMORY
+
+Structure de la mémoire : on a un cell_heap (qui est représenté par un arbre binaire complet gauche dans un tableau) et un heap standard. On a aussi une free_list qui est un tableau (mdr, vive le C, pointeur = tableau tro draul) qui contient les addresses des cells libres (mais pas forcément allouées dans le cell_heap, d'où la présence de free_list_avail qui est le nombre de cells libres et free_list_consumed qui est le nombre de cells allouées, donc occupées + libres).
+
+Il y a des constantes arbitraires : 100 000 cells sur le heap_cells et 8Ko de heap
+L'initialisation se fait en faisant un bon malloc des familles pour tout le cell_heap, et met des 0 partout.
+
+L'allocation d'une cell (cell_alloc) se fait en rajoutant une cell dans le cell_heap : soit on a une cell marquée comme libre, et on renvoie son adresse, soit c'est pas le cas et on renvoie l'adresse de la première case libre du cell_heap.
+
+L'allocation de bytes (bytes_alloc) est juste un malloc (apparemment la gestion du byte_heap a été commentée, mais c'était juste la gestion du tas habituelle).
+
+Fonction helper (pas visible en-dehors du fichier) mark_tree(cell) récursive qui rajoute TAG_MARK à tous les tags si ce n'est pas déjà le cas. Elle est appelée par collect_garbage_iter.
+
+collect_garbage parcourt la pile (du haut (stack_end) vers le bas (stack_pointer)) en markant les cells qu'il rencontre. L'auteur reconnaît lui-même qu'il y a un hack car il ne connait pas le type des données de la pile (et propose donc de mettre le type en header des données susceptibles de se retrouver dans la pile). Il appelle collect_garbage_iter sur chacune des cells contenues dans l'environnement, et aussi mark_tree sur la liste des fichiers. Il sweep ensuite : tout ce qui n'a pas été marqué (et est donc inatteignable) se prend un TAG_FREED et il met à jour free_list, free_list_avail, et free_list_consumed (apparemment il a un problème avec les LAMBDAS, parce que les clôtures anonymes ne sont pointées par personnes mais seraient quand même utilisées (?), donc il les libère pas ; la solution proposée est de mettre de la metadata on ne sait où avec les appelants). Il ne free pas les TAB_BYTES ou TAG_STR (pourquoi ?). Enfin tout le monde perd son tag marké pour l'étape suivante. La fonction renvoie un entier (avec alloc_int) contenant le nombre de cells libérées.
+
+cell_realloc déplace une cell à une nouvelle adresse, sans free la cell qu'il y avait avant (//FIXME...).
+
+alloc_stats renvoie une MemStats avec les bonnes infos dedans.
+
+alloc_cons (TAG_CONS) et alloc_list font ce qu'on pense avec des cell_alloc et en initialisant les pointeurs. L'auteur de demande si il devrait copier le contenu ou les adresses (ici il copie les adresses dans les cells allouées).
+alloc_sym alloue un symbole (TAG_SYM, i.e. un atome) avec la string passée en argument.
+alloc_int (TAG_INT) alloue une cell contenant un entier.
+alloc_num_bytes (TAG_BYTES) alloue une cell contenant des données random.
+alloc_bytes appelle alloc_num_bytes avec SYM_INIT_BUFFER_SIZE.
+Idem pour aloloc_num_string (TAG_STR), alloc_substr (recopie une sous-string dans une nouvelle string), alloc_string (alloc_num_string avec SYM_INIT_BUFFER_SIZE), alloc_string_copy, alloc_string_from_bytes, alloc_concat (concatène deux cell contenant des bytes ou une string), alloc_builtin (TAG_BUILTIN), alloc_lambda (TAG_LAMBDA) qui contient un pointeur sur une cell (ses arguments) et n'a pas de définition, alloc_nil, alloc_vector (TAG_VEC), alloc_struct_def (TAG_STRUCT_DEF), alloc_struct (TAG_STRUCT) qui prend une struct_def et renvoie une vector cell dont le 0 pointe sur la struct_def et les num_fields champs suivants pointent sur un clone des éléments de la def, alloc_error (TAG_ERROR), et alloc_clone qui recopie récursivement toute la structure de la cell.
+
+
+writer.h / writer.c :
+
+tag_to_str renvoie juste une string décrivant le tag en question (bizarrement, les cases TAGT_FS (filesystem) et TAG_MARK (gc_mark) sont commentés...).
+
+write_ écrit (apparemment, trop long pour tout lire...) la cell dans un buffer passé en argument. (fonction invisible depuis l'extérieur)
+
+lisp_write appelle juste write_
+lip_write_to_cell écrit la première cell dans la deuxième qui est une TAG_STR ou TAG_BYTES.
+
+
+reader.h / reader.c :
+
+TODO
+
+
+stream.h / stream.c :
+
+Filesystem est une collection de cells qui sont des fonctions pour ouvrir un fichier, le fermer, le lire, écrire, supprimer et un mmap (itérer sur toutes les cells du fichier) (ainsi que mount_point).
+
+Un Stream est un filesystem avec des infos du genre taille, position, id, mode...
+
+fs_open permet d'ouvrir un fichier (prend le path en argument) (à lire plus en détail)
+
+fs_mmap permet de map la mmap_fn sur le contenu du fichier (à lire plus en détail)
+
+fs_mount
+
+wrap_in_lambda
+
+stream_read
+
+stream_write
+
+fs_mount_builtin
+
+filesystems_init
+
+
+jit_x64.x :
+
+TODO
+
+
+utf8.h / utf8.c :
+
+TODO
+
+
+compiler_new.h / compiler_new.c :
+
+TODO
+
+
+compiler_x64_hosted.x :
+
+TODO
+
+
+sledge.c :
+
+TODO
+
+
+
+Après tout ça normalement on a compris son InterimLisp de merde, et on pourra lire les fichiers .l de os/ (et peut-être tests/). Je crois que legacy/ c'est juste des vieux fichiers qu'il garde on sait pas trop pourquoi (il a un git quand même...) donc on osef.
