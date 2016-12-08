@@ -67,6 +67,7 @@ writer.h / writer.c :
 tag_to_str renvoie juste une string décrivant le tag en question (bizarrement, les cases TAGT_FS (filesystem) et TAG_MARK (gc_mark) sont commentés...).
 
 write_ écrit (apparemment, trop long pour tout lire...) la cell dans un buffer passé en argument. (fonction invisible depuis l'extérieur)
+Ecriture sous la forme ou l'on écrit du Lisp (ex: (+ 1 2)). Le paramètre in_list permet d'écire (1 2 3) au lieu de (1 (2 3))
 
 lisp_write appelle juste write_
 lip_write_to_cell écrit la première cell dans la deuxième qui est une TAG_STR ou TAG_BYTES.
