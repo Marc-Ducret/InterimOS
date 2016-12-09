@@ -1,4 +1,4 @@
-STD C :
+﻿STD C :
 
 malloc(size) alloue la mémoire et renvoie un pointeur dessus (void*).
 free(truc) le détruit (i.e. le marque libre pour l'OS).
@@ -75,7 +75,7 @@ lip_write_to_cell écrit la première cell dans la deuxième qui est une TAG_STR
 
 reader.h / reader.c :
 
-TODO
+parser de lisp écrit à la main
 
 
 stream.h / stream.c :
@@ -103,12 +103,13 @@ filesystems_init
 
 jit_x64.x :
 
-TODO
+implémente des commandes permettant d'écrire de l'assembleur pour écire du x86-64
 
 
 utf8.h / utf8.c :
 
-TODO
+permet d'écrire de faire des conversions entre chaînes d'entiers et des "rune" (= caractére) unicode.
+Leur taille en nombre d'octects est variable.
 
 
 compiler_new.h / compiler_new.c :
