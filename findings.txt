@@ -18,7 +18,7 @@ Le type Cell a l'air d'être un genre de liste chaînée, probablement pour repr
  - un tag (qui est un word, appremment dit le type, genre CONS, LET, STREAM..., définis avec des #define). Le tag définit quel élément de ar ou dr est utilisé. TAG_MARK (qui peut-être combiné avec les autres tags) signifie que la cell est libre il semblerait.
 Note : pour connaître la structure de chaque cell (en fonction du TAG), aller voir alloc.c est pas mal (initialisation des champs).
 
-Une env_entry est un programme (sans doute), avec un nom et une Cell.
+Une env_entry est un objet minilisp avec un nom et une Cell.
 
 car(cell) renvoie l'adresse (une autre Cell) de l'élément en tête de liste, et cdr(cell) la suite (une autre Cell).
 
@@ -32,7 +32,7 @@ Implémentation : table de hachage standard, le nombre de clés est sauvegardé 
 
 alloc.h / alloc.c :
 
-Un env_t est une StrMap (environnement)
+Un env_t est une StrMap (environnement) qui contient des env_entry
 Un cell_allocator_t est un type somme CA_STACK | CA_HEAP
 Une MemStats contient le nombre de cells utilisées / max (stockées sur le cell_heap) et le nombre d'octets du tas utilisés / max (jusqu'ici je pense, rien à voir avec une limite système).
 oom_cell est une cell prédéfinie qui représente l'erreur ERR_OUT_OF_MEMORY
@@ -108,23 +108,49 @@ implémente des commandes permettant d'écrire de l'assembleur pour écire du x8
 
 utf8.h / utf8.c :
 
-permet d'écrire de faire des conversions entre chaînes d'entiers et des "rune" (= caractére) unicode.
+permet d'écrire de faire des conversions entre chaînes d'entiers et des "rune" (= caractère) unicode.
 Leur taille en nombre d'octects est variable.
 
 
 compiler_new.h / compiler_new.c :
 
-TODO
+Un arg_t est une enum avec plusieurs cas (constante, environnement, lamda, registre, pile...)
+Un Arg contient un arg_t, une cell, un env_entry, un slot, un nom et un nom de type
+Une Frame est une genre de liste chaînée
+builtin_t est une enum contenant toutes les fonctions minilisp de base
+
+lookup_global_symbol cherche dans global_env (un env_t déclaré dans compiler_new.c) l'env_entry correspondant au nom donné
+insert_symbol(symbol, cell, env) rajoute ce qu'on pense dans l'env et renvoie cell
+insert_global_symbol est juste un raccourci avec global_env
+
+load_int produit du code assembleur pour charger un argument dans un registre
+load_cell a l'air de faire un truc un peu pareil
+get_sym_frame_idx cherche dans un tableau d'arguments (éventuellement en ignorant les registres) un argument dont le nom n'est pas celui cherché (et renvoie son indice)
+
+push_frame_regs ?
+pop_frame_regs pop au lieu de push
+
+analyze_fn ?
+compatible_types est l'égalité avec en plus Str ~ BYTES
+clean_return remet le stack pointer au bon endroit (dépile les arguments)
+
+compile_expr est le KRAKEN
+
+init_compiler initialise pleins de prototypes bizarres et rajoute tous les builtins dans l'environnement avec pleins d'appels à alloc.
 
 
 compiler_x64_hosted.x :
 
-TODO
+execute_jitted appelle la fonction passée en argument (funcptr, i.e. void*) avec l'argument 0
+
+compile_for_platform ?
 
 
 sledge.c :
 
-TODO
+Contient le main, qui ouvre le channel donné en argument (ou stdin) et demande dedans une expression, la parse avec read_string, appelle compile_for_platform puis lisp_write sur la sortie.
+
+platform_eval a l'ar d'être utilisé par personne
 
 
 
