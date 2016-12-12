@@ -70,6 +70,9 @@ Cell* cell_alloc() {
     Cell* res = &cell_heap[cells_used];
     cells_used++;
     if (cells_used>MAX_CELLS) {
+		//@ADD START
+		
+		//@ADD END
       printf("!! cell_alloc failed, MAX_CELLS used.\n");
       exit(1);
     }
@@ -178,6 +181,15 @@ void collect_garbage_iter(const char *key, void *value, const void *obj)
   //printf("key: %s value: %s\n", key, value);
   mark_tree(e->cell);
 }
+
+//@add start
+Cell* collect_garbage_if_needed(env_t* global_env, void* stack_end, void* stack_pointer) {
+	if(MAX_CELLS - cells_used + free_list_avail - free_list_consumed < MAX_CELLS / 4) {
+		printf("run gc\r\n");
+		collect_garbage(global_env, stack_end, stack_pointer);
+	}
+}
+//@add end
 
 Cell* collect_garbage(env_t* global_env, void* stack_end, void* stack_pointer) {
   // mark

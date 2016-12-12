@@ -113,6 +113,7 @@ typedef enum builtin_t {
   BUILTIN_SEND,
 
   BUILTIN_GC,
+  BUILTIN_GC_IF_NEEDED, //@add
   BUILTIN_SYMBOLS,
   BUILTIN_DEBUG,
   

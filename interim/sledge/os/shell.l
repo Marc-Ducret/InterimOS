@@ -251,10 +251,10 @@
   (run-tasks)
   (send screen 0)
   (def cursor-blink (% (+ cursor-blink 1) cursor-blink-delay))
-  
-  (if (% frames gc-period) 0 (gc)) ; @line was (gc) 
   (if frames 0 (print "60 frames")) ; @added
   (def frames (% (+ frames 1) 60));  @added
+  ;(if (% frames gc-period) 0 (gc)) ; @line was (gc)
+  (gc)
 ))))
 
 (main)

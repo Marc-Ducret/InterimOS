@@ -1634,6 +1634,17 @@ Cell* compile_expr(Cell* expr, Frame* frame, Cell* return_type) {
       pop_frame_regs(frame->f);
       break;
     }
+	//@add start
+    case BUILTIN_GC_IF_NEEDED: { 
+      push_frame_regs(frame->f);
+      jit_lea(ARGR0,global_env);
+      jit_movi(ARGR1,(jit_word_t)frame->stack_end);
+      jit_movr(ARGR2,RSP);
+      jit_call3(collect_garbage_if_needed,"collect_garbage_if_needed");
+      pop_frame_regs(frame->f);
+      break;
+    }
+	//@add end
     case BUILTIN_SYMBOLS: {
       jit_lea(ARGR0,global_env);
       jit_call(list_symbols,"list_symbols");
@@ -1901,6 +1912,7 @@ void init_compiler() {
   //printf("[compiler] write/eval\r\n");
   
   insert_symbol(alloc_sym("gc"), alloc_builtin(BUILTIN_GC, NULL), &global_env);
+  insert_symbol(alloc_sym("gc-if-needed"), alloc_builtin(BUILTIN_GC_IF_NEEDED, NULL), &global_env); //@add
   insert_symbol(alloc_sym("symbols"), alloc_builtin(BUILTIN_SYMBOLS, NULL), &global_env);
 
   insert_symbol(alloc_sym("debug"), alloc_builtin(BUILTIN_DEBUG, NULL), &global_env);
