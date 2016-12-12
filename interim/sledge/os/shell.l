@@ -13,7 +13,7 @@
   surface (surface))
 
 (def draw-logo (fn ox oy (do
-  (let c 0xff8e)
+  (let c 0xf0f0) ; @0xff8e -> 0xf0f0
   (line fb (pt (+ ox 16) (- oy 38)) (pt (+ ox 16) (- oy 102)) c)
   (line fb (pt (+ ox 16) (- oy 102)) (pt (+ ox 80) (- oy 38)) c)
   (line fb (pt (+ ox 80) (- oy 38)) (pt (+ ox 80) (- oy 102)) c)
@@ -244,11 +244,17 @@
 (sput launcher-task redrawn 1)
 ;(add-task launcher-func launcher-task 0)
 
+(def frames 0) ; @added
+(def gc-period 20) ; @added 
+
 (def main (fn (while 1 (do
   (run-tasks)
   (send screen 0)
-  (gc)
   (def cursor-blink (% (+ cursor-blink 1) cursor-blink-delay))
+  
+  (if (% frames gc-period) 0 (gc)) ; @line was (gc) 
+  (if frames 0 (print "60 frames")) ; @added
+  (def frames (% (+ frames 1) 60));  @added
 ))))
 
 (main)
