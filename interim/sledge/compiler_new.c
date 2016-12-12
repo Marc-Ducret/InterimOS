@@ -1,3 +1,4 @@
+#include <time.h> // @added
 #include "minilisp.h"
 #include "reader.h"
 #include "writer.h"
@@ -98,9 +99,13 @@ void debug_break(Cell* arg) {
   exit(0);
 }
 
+int lastClock = 0; //@added time remember
+
 Cell* lisp_print(Cell* arg) {
   lisp_write(arg, temp_print_buffer, TMP_PRINT_BUFSZ);
-  printf("%s\r\n",temp_print_buffer);
+  int c = clock(); //@time
+  printf("%d\t%s\r\n", (c-lastClock)/1000, temp_print_buffer); //@displays time
+  lastClock = c; //@time
   return arg;
 }
 
