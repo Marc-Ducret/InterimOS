@@ -1,0 +1,88 @@
+Note : j'ai l'impression que les fonctions du code alloc.c sont disponibles en assembleur avec le même nom, il fait plein de "callq alloc_bidule" et ça doit bien allouer une cell avec le GC et tout
+En fait c'est logique oui, vu qu'il écrit son code assembleur dans la ram et qu'après il l'éxécute avec son execute_jitted de la mort #ASM_EMBEDDED_FTW
+
+PUTAIN LE CANCER JE VIENS DE VOIR QUE SON JIT_MOVR(A, B) FAIT MOVQ B, A DONC CA INVERSE SOURCE ET DESTINATION BLBLBLBLBLBLB NTM ZENTHAO KSGKLHSKLMGHBSEKRLTGHSEKLMRGNSEKDRLGH MLKSER
+
+
+Schéma de compilation :
+
+Si on a ni un TAG_CONS ni un TAG_SYM, on renvoie l'expr elle-même.
+
+TAG_SYM : on regarde si il est dans la fn_frame ou alors l'environnement global, sinon on affiche une erreur et on met 0.
+
+Maintenant on regarde TAG_CONS :
+
+- Vérifications initiales
+On vérifie que la tête de liste est bien un TAG_SYM, et qu'il est défini dans l'environnement global.
+On vérifie qu'on a la bonne signature (i.e. bons nombre et types d'arguments) avec lazy evaluation pour les lambda mais eager evaluation (le contraire) pour les cons (applications de fonctions).
+
+- BUILTINS :
+  - BUILTIN_BITAND : and bit à bit
+  - BUILTIN_BITNOT : not bit à bit
+  - BUILTIN_BITOR  : or  bit à bit
+  - BUILTIN_BITXOR : xor bit à bit
+  
+  - BUILTIN_SHL : shift logical left
+  - BUILTIN_SHR : shift logical right
+
+  - BUILTIN_ADD : addition
+  - BUILTIN_SUB : soustraction
+  - BUILTIN_MUL : multiplication
+  - BUILTIN_DIV : division
+  - BUILTIN_MOD : modulo
+
+  - BUILTIN_GT : > (soustraction puis jump if neg)
+  - BUILTIN_LT : <
+  - BUILTIN_EQ : =
+
+  - BUILTIN_DEF : load l'addresse du symbole défini, push les arguments sur la pile, appelle cal insert_global_symbol puis pop les arguments
+  - BUILTIN_LET : seulement permis dans une fonction, pas au niveau global ; rajoute dans la frame l'info que on a push le let sur la pile (avec une histoire d'inférence de types qui a pas l'air bien maligne) puis load_cell ou load_int
+  - BUILTIN_FN  : on appelle num_lets pour prévoir l'espace sur la pile, on contruit la signature (avec les arguments au-dessus de 4 (ARG_SPILLOVER) marqués comme passés sur la pile, sinon dans les registres) et fais des trucs avec des labels L0_truc et L1_truc
+
+  - BUILTIN_IF : standard, vérfie que then et else renvoient un truc du même type
+  - BUILTIN_WHILE : standard avec deux labels : label_loop et label_skip (il a mis la condition au début, on peut améliorer en la mettant à la fin pour ne faire n + 1 jumps pour n tours au lieu de 2n)
+  - BUILTIN_DO : (do x1 ... xn) exécute x1, ..., xn et renvoie le bidule renvoyé par xn (comme ; en OCaml)
+  - BUILTIN_LIST : (list x1 ... xn) renvoie (cons x1 (cons x2 (.. (xn) .. )))
+  
+  - BUILTIN_STRUCT : (struct s i1 x1 .. in xn) renvoie une STRUCT_DEF qui est un bidule s'appelant s à n champs dont les noms sont les i et les valeurs x si j'ai bien compris
+  - BUILTIN_NEW : alloue une STRUCT avec la STRUCT_DEF données en argument
+  - BUILTIN_SGET : choppe la valeur du champ d'une STRUCT
+  - BUILTIN_SPUT : modifie la valeur du champ d'une STRUCT
+
+  - BUILTIN_QUOTE : load l'addresse du premier argument ?
+  - BUILTIN_CAR : choppe la tête de la paire (arithmétique de pointeur)
+  - BUILTIN_CDR : choppe la queue (#yoan) de la paire (arithmétique de pointuer)
+  - BUILTIN_CONS : juste alloc_cons avec ce qu'on pense
+  - BUILTIN_CONCAT : alloc_concat avec ce qu'on pense
+  - BUILTIN_SUSBTR : alloc_substr (sub-string)
+
+  - BUILTIN_GET8  : choppe le premier byte à adresse ? fais des contrôles de types dynamiques un peu chelous mais why not
+  - BUILTIN_GET16 : idem avec 2 bytes
+  - BUILTIN_GET32 : idem avec 4 bytes
+  - BUILTIN_PUT8  : modifie le premier byte à une adresse
+  - BUILTIN_PUT16 : idem avec 2 bytes
+  - BUILTIN_PUT32 : idem avec 4 bytes
+
+  - BUILTIN_ALLOC : alloc_num_bytes
+  - BUILTIN_ALLOC_STR : alloc_string
+  - BUILTIN_BYTES_TO_STR : alloc_string_from_bytes (fais une copie)
+
+  Les builtins de ce groupe sont placés entre un jit_host_call_enter (sauvegarde rsp dans rax, push rax (donc rsp) sur la pile, met les 4 bits de poids faible de rsp à 0 et met rax à l'adresse pointée par rsp) et un jit_host_call_exit (juste un pop foutu dans rsp) qui doivent servir à émuler un genre d'appel de programme extérieur (un peu comme une fonction)
+  - BUILTIN_WRITE : lisp_write_to_cell
+  - BUILTIN_READ : read_string_cell
+  - BUILTIN_EVAL : platform_eval (tiens je me demandais à quoi servait cette fonction de sledge, maintenant on sait que c'est pour interpréter du code minilisp en minilisp)
+  
+  - BUILTIN_SIZE : size de l'argument dans la mémoire
+  - BUILTIN_GC : appelle collect_garbage en ayant push et pop des arguments (l'env, et les deux extrémités de la pile)
+  - BUILTIN_SYMBOLS : list_symbols
+  - BUILTIN_DEBUG : normalement platform_debug, mais a été commenté
+
+  Encore des fonctions entre des jit_host
+  - BUILTIN_PRINT : lisp_print
+  - BUILTIN_MOUNT : fs_mount
+  - BUILTIN_MMAP : fs_mmap
+  - BUILTIN_OPEN : fs_open
+  - BUILTIN_RECV : stream_read
+  - BUILTIN_SEND : stream_write
+
+- Si on n'a pas un BUILTIN : apparemment c'est un appel à un LAMBDA, on push des arguments, un peu d'arithmétique de pointeurs et on fait l'appel à l'adresse qu'il faut, puis on fait un clean_return
