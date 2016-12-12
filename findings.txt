@@ -127,10 +127,10 @@ load_int produit du code assembleur pour charger un argument dans un registre
 load_cell a l'air de faire un truc un peu pareil
 get_sym_frame_idx cherche dans un tableau d'arguments (éventuellement en ignorant les registres) un argument dont le nom n'est pas celui cherché (et renvoie son indice)
 
-push_frame_regs ?
+push_frame_regs push les n registres R4...R4+n sur la pile où n est le nombre d'arguments de type ARGT_REG de la frame passée en argument
 pop_frame_regs pop au lieu de push
 
-analyze_fn ?
+analyze_fn Compte le nombre d'atomes différents (SYM) dans l'expression fournie (recursivement) ?
 compatible_types est l'égalité avec en plus Str ~ BYTES
 clean_return remet le stack pointer au bon endroit (dépile les arguments)
 
@@ -143,7 +143,11 @@ compiler_x64_hosted.x :
 
 execute_jitted appelle la fonction passée en argument (funcptr, i.e. void*) avec l'argument 0
 
-compile_for_platform ?
+compile_for_platform Compile l'expression donnée, l'execute et place le résultat dans res
+
+execute_jitted(void* binary) squoi ça lol
+
+ligne 159: "return !!success;" ça fait vraiment ce que je pense que ça fait??
 
 
 sledge.c :
@@ -155,3 +159,5 @@ platform_eval a l'ar d'être utilisé par personne
 
 
 Après tout ça normalement on a compris son InterimLisp de merde, et on pourra lire les fichiers .l de os/ (et peut-être tests/). Je crois que legacy/ c'est juste des vieux fichiers qu'il garde on sait pas trop pourquoi (il a un git quand même...) donc on osef.
+
+Je pense que l'on maintenant bien compris le fonctionnement, mais il faut alors que l'on trouve un truc donc la complexité est quelque peut intéréssante et que l'on peut améliorer. A mon avis, je ne vois pas vraiment vers quoi d'autre que le génération de l'assembleur on pourrait se tourner...
