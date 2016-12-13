@@ -24,13 +24,13 @@
   (line fb (pt (+ ox 208) (- oy 102)) (pt (+ ox 272) (- oy 102)) c)
 )))
 
-(def desktop-task (fn (t task) (do
+(def desktop-func (fn (t task) (do
   (if (sget t needs-redraw) (do
-    (clear)
-    (draw-logo (- (/ (sget fb width) 2) 140) (/ (sget fb height) 2))
-    (draw-logo (- (/ (sget fb width) 2) 139) (/ (sget fb height) 2))
-    (draw-logo (- (/ (sget fb width) 2) 140) (+ 1 (/ (sget fb height) 2)))
-    (send screen 0)
+    (blit-str fb unifont "Lusin" 100 100)
+   (draw-logo (- (/ (sget fb width) 2) 140) (/ (sget fb height) 2))
+   (draw-logo (- (/ (sget fb width) 2) 139) (/ (sget fb height) 2))
+   (draw-logo (- (/ (sget fb width) 2) 140) (+ 1 (/ (sget fb height) 2)))
+   (sput t needs-redraw 0) 
   ) 0)
   0
 )))
@@ -38,9 +38,6 @@
 (def keyboard (open "/keyboard"))
 
 (import "/sd/os/mouse.l")
-
-(draw-logo (- (/ (sget fb width) 2) 140) (/ (sget fb height) 2))
-(blit-str fb unifont "hello" 100 100)
 
 (def tasks (list))
 (def new-tasks (list))
@@ -86,6 +83,8 @@
 (def mouse-resizing 0)
 (def focus-given 0)
 
+(def force-draw 1) ;@added
+
 (def check-task-focus (fn (t task) (do
   (let surf  (sget t surface))
   (let x (sget surf x))
@@ -103,11 +102,11 @@
           (def focus-given 1)
           (sput t focused 1)) 0) 
       (sput t focused 0))) 0)
-
-  (if mouse-dragging
+  (if force-draw (do (sput t needs-redraw 1) (sput t redrawn 1)) 0)
+  (if mouse-dragging (do 
     (if (sget t focused)
       (do
-              (boxfill fb x y (- x2 x) (- y2 y) 0xffff)
+             (boxfill fb x y (- x2 x) (- y2 y) 0xffff)
               (if (or mouse-resizing (and (gt mouse-x (- x2 16)) (gt mouse-y (- y2 16))))
                 (do ; resize
                   (let nw (+ (sget surf width) mouse-dx))
@@ -122,7 +121,7 @@
                 (do ; move
                   (sput surf x (+ mouse-dx x))
                   (sput surf y (+ mouse-dy y))) )
-              (sput t redrawn 1) ) 0) 0)
+              (sput t redrawn 1) ) 0)) 0)
   0
 )))
 
@@ -157,7 +156,7 @@
     (let task-obj   (car (cdr task-item)))
     (let task-state (car (cdr (cdr task-item))))
 
-    (check-task-focus task-obj)
+   (check-task-focus task-obj)
 
     (task-func task-obj task-state)
     (paint-task task-obj)
@@ -215,6 +214,7 @@
   (sput my-task redrawn 1)
   (add-task repl-task my-task my-repl)
   (def mask-task-id (+ max-task-id 1))
+
 )))
 
 (spawn-editor 32 32 "editor               ")
@@ -224,6 +224,14 @@
 (sput mouse-task id (+ max-task-id 1))
 (sput mouse-task name "mouse")
 (add-task mouse-func mouse-task 0)
+(def max-task-id (+ max-task-id 1))
+
+(def desktop-task (new task))
+(sput desktop-task id (+ max-task-id 1))
+(sput desktop-task name "desktop")
+(sput desktop-task redrawn 1)
+(add-task desktop-func desktop-task 0)
+(def max-task-id (+ max-task-id 1))
 
 (def launched 0)
 
@@ -245,16 +253,15 @@
 ;(add-task launcher-func launcher-task 0)
 
 (def frames 0) ; @added
-(def gc-period 20) ; @added 
 
 (def main (fn (while 1 (do
+  ;(clear)
   (run-tasks)
   (send screen 0)
   (def cursor-blink (% (+ cursor-blink 1) cursor-blink-delay))
   (if frames 0 (print "60 frames")) ; @added
   (def frames (% (+ frames 1) 60));  @added
-  ;(if (% frames gc-period) 0 (gc)) ; @line was (gc)
-  (gc)
+  (gc-if-needed) ; @gc -> gc-if-needed
 ))))
 
 (main)

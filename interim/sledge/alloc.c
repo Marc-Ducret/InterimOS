@@ -184,8 +184,8 @@ void collect_garbage_iter(const char *key, void *value, const void *obj)
 
 //@add start
 Cell* collect_garbage_if_needed(env_t* global_env, void* stack_end, void* stack_pointer) {
-	if(MAX_CELLS - cells_used + free_list_avail - free_list_consumed < MAX_CELLS / 4) {
-		printf("run gc\r\n");
+	if(MAX_CELLS - cells_used + free_list_avail - free_list_consumed < MAX_CELLS / 2) {
+		//printf("run gc (free: %d)\r\n", (MAX_CELLS - cells_used + free_list_avail - free_list_consumed) * 100 / MAX_CELLS);
 		collect_garbage(global_env, stack_end, stack_pointer);
 	}
 }

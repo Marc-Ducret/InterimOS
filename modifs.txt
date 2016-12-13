@@ -1,0 +1,45 @@
+Garbage collecting opti:
+	Les appels aux GC sont couteux car il faut alors explorer toutes les
+	références pour savoir si une Cell est encore utilisée ou non. Ils sont
+	cependant nécésaires car sinon le programme tombe à court de mémoire.
+	Dans shell.l on remarque que après l'execution et le dessin de chaque
+	frame, le GC est appelé. Parfois, la mémoire est encore loin d'être pleine
+	et il n'est alors pas nécésaire de faire cet appel. Nous l'avons ainsi
+	remplacé par une nouvelle fonction native (builtin) "gc-if-needed" qui
+	appelle le GC seulement si la mémoire est trop remplie.
+	De cette manière, il n'y a pas de problème de mémoire et on mesure, lorsque
+	le système est inactif un gain de performances de 50%. Malheuresement,
+	en activité, les gains sont bien moins importants car la mémoire est
+	utilisée intensivement et se remplie vite.
+	
+	[gc systématique : 60 frames en 90 unités de temps
+	 gc si nécessaire: 60 frames en 60 unités de temps]
+	 
+	[Implémentation (si tu veux inclure du code) dans collect_garbage_if_needed
+	 (alloc.c), BUILTIN_GC_IF_NEEDED (compiler_new.c) et main (shell.l)]
+	 
+Système de Tasks:
+	- Permet de gérer plusieurs fenêtres
+	- Très buggé : segfaults à foison (resize...), z-fighting, ne se redessine
+					pas toujours automatiquement
+
+Ajouts:
+	- Desktop task, pour afficher correctement le logo au fond et du texte
+	- Force draw qui donne un rendu correct mais qui est très lent
+	
+Analyse de la lenteur du rendu:
+	Il se trouve que le rendu des fenêtres d'Interim OS est très lent. En effet
+	une simple remise à blanc de l'écran par frame impacte drastiquement les
+	performances en ralentissent l'exécution de l'ordre de 5 fois.
+	Ceci n'est pas étonnant car toutes les opérations se font pixel par pixel.
+	D'une part ce genre de travail sur des pixels n'est pas adapté pour un
+	CPU et devrait être exécuté par un GPU. D'autre part, il est normalement
+	possible de faire de telles opérations simples et de s'en tirer avec une
+	vitesse d'affichage correcte même sans accélération GPU, mais ici pour
+	chaque pixel, il y a un certain overhead lié à l'interfaçage entre mini-lisp
+	et le Filesystem représentant l'écran puis le programme C. Ainsi pour
+	résoudre ce problème, il faudrait ajouter des primitives pour directement
+	remplir une zone entière d'une certaine couleur. Si on assimile l'écran
+	a un carré de coté n alors on divise ainsi l'overhead par un facteur
+	proportionnel à n^2 puisque on le paye désormais qu'une fois par rectangle
+	au lieu d'une fois par pixel.
