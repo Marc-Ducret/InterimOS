@@ -386,7 +386,7 @@ Il se trouve que le rendu des fenêtres d'\foreign{Interim OS} est très lent. E
 
 D'une part, ce genre de travail sur des pixels n'est pas adapté pour un \foreign{CPU} et devrait être exécuté par un \foreign{GPU}. D'autre part, il est normalement possible de faire de telles opérations simples et de s'en tirer avec une vitesse d'affichage correcte même sans accélération \foreign{GPU}, mais ici pour chaque pixel, il y a un certain coût fixe lié à l'interfaçage entre \foreign{Minilisp} et le \codeC{Filesystem} représentant l'écran puis le programme \foreign{C}. 
 
-Ainsi pour résoudre ce problème, il faudrait ajouter des primitives pour remplir directement une zone entière d'une certaine couleur. Si on assimile l'écran à un carré de pixels de coté $n$ ,alors on divise ainsi le coût fixe par un facteur proportionnel à $n^2$ puisqu'on ne le paye désormais qu'une seule fois par rectangle au lieu d'une fois par pixel.
+Ainsi pour résoudre ce problème, il faudrait ajouter des primitives pour remplir directement une zone entière d'une certaine couleur. Si on assimile l'écran à un carré de pixels de coté $n$, alors on divise ainsi le coût fixe par un facteur proportionnel à $n^2$ puisqu'on ne le paye désormais qu'une seule fois par rectangle au lieu d'une fois par pixel.
 
 
 \end{document}
