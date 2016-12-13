@@ -1,0 +1,563 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}include} \PYGcolorful{c+cpf}{\PYGcolorfulZdq{}alloc.h\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}include} \PYGcolorful{c+cpf}{\PYGcolorfulZlt{}string.h\PYGcolorfulZgt{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}include} \PYGcolorful{c+cpf}{\PYGcolorfulZdq{}stream.h\PYGcolorfulZdq{}}
+
+\PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n}{byte\PYGcolorfulZus{}heap}\PYGcolorful{p}{;}
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{cell\PYGcolorfulZus{}heap}\PYGcolorful{p}{;}
+
+\PYGcolorful{k+kt}{size\PYGcolorfulZus{}t} \PYGcolorful{n}{cells\PYGcolorfulZus{}used}\PYGcolorful{p}{;}
+\PYGcolorful{k+kt}{size\PYGcolorfulZus{}t} \PYGcolorful{n}{byte\PYGcolorfulZus{}heap\PYGcolorfulZus{}used}\PYGcolorful{p}{;}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{**} \PYGcolorful{n}{free\PYGcolorfulZus{}list}\PYGcolorful{p}{;}
+\PYGcolorful{k+kt}{size\PYGcolorfulZus{}t} \PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}avail}\PYGcolorful{p}{;}
+\PYGcolorful{k+kt}{size\PYGcolorfulZus{}t} \PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}consumed}\PYGcolorful{p}{;}
+
+\PYGcolorful{n}{Cell} \PYGcolorful{n}{oom\PYGcolorfulZus{}cell}\PYGcolorful{p}{;}
+
+\PYGcolorful{c+c1}{//\PYGcolorfulZsh{}define DEBUG\PYGcolorfulZus{}GC}
+
+\PYGcolorful{c+c1}{// TODO define in machine specs}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define MAX\PYGcolorfulZus{}CELLS 100000}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define MAX\PYGcolorfulZus{}BYTE\PYGcolorfulZus{}HEAP 8*1024}
+
+\PYGcolorful{k}{static} \PYGcolorful{k}{struct} \PYGcolorful{n}{MemStats} \PYGcolorful{n}{mem\PYGcolorfulZus{}stats}\PYGcolorful{p}{;}
+
+\PYGcolorful{k+kt}{void} \PYGcolorful{n+nf}{init\PYGcolorfulZus{}allocator}\PYGcolorful{p}{()} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{k+kt}{unsigned} \PYGcolorful{k+kt}{int} \PYGcolorful{n}{cell\PYGcolorfulZus{}mem\PYGcolorfulZus{}reserved} \PYGcolorful{o}{=} \PYGcolorful{n}{MAX\PYGcolorfulZus{}CELLS}\PYGcolorful{o}{*}\PYGcolorful{k}{sizeof}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{p}{);}
+
+  \PYGcolorful{n}{oom\PYGcolorfulZus{}cell}\PYGcolorful{p}{.}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}ERROR}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{oom\PYGcolorfulZus{}cell}\PYGcolorful{p}{.}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{value} \PYGcolorful{o}{=} \PYGcolorful{n}{ERR\PYGcolorfulZus{}OUT\PYGcolorfulZus{}OF\PYGcolorfulZus{}MEMORY}\PYGcolorful{p}{;}
+
+  \PYGcolorful{n}{byte\PYGcolorfulZus{}heap\PYGcolorfulZus{}used} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{cells\PYGcolorfulZus{}used} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}avail} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}consumed} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{byte\PYGcolorfulZus{}heap} \PYGcolorful{o}{=} \PYGcolorful{n+nb}{NULL}\PYGcolorful{p}{;}
+
+  \PYGcolorful{n}{cell\PYGcolorfulZus{}heap} \PYGcolorful{o}{=} \PYGcolorful{n}{malloc}\PYGcolorful{p}{(}\PYGcolorful{n}{cell\PYGcolorfulZus{}mem\PYGcolorfulZus{}reserved}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{printf}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}}\PYGcolorful{l+s+se}{\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n}\PYGcolorful{l+s}{[alloc] cell heap at \PYGcolorfulZpc{}p, \PYGcolorfulZpc{}d bytes reserved}\PYGcolorful{l+s+se}{\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n}\PYGcolorful{l+s}{\PYGcolorfulZdq{}}\PYGcolorful{p}{,}\PYGcolorful{n}{cell\PYGcolorfulZus{}heap}\PYGcolorful{p}{,}\PYGcolorful{n}{cell\PYGcolorfulZus{}mem\PYGcolorfulZus{}reserved}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{memset}\PYGcolorful{p}{(}\PYGcolorful{n}{cell\PYGcolorfulZus{}heap}\PYGcolorful{p}{,}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{,}\PYGcolorful{n}{cell\PYGcolorfulZus{}mem\PYGcolorfulZus{}reserved}\PYGcolorful{p}{);}
+
+  \PYGcolorful{n}{free\PYGcolorfulZus{}list} \PYGcolorful{o}{=} \PYGcolorful{n}{malloc}\PYGcolorful{p}{(}\PYGcolorful{n}{MAX\PYGcolorfulZus{}CELLS}\PYGcolorful{o}{*}\PYGcolorful{k}{sizeof}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*}\PYGcolorful{p}{));}
+
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}[alloc] initialized.\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{});}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{get\PYGcolorfulZus{}cell\PYGcolorfulZus{}heap}\PYGcolorful{p}{()} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{cell\PYGcolorfulZus{}heap}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{c+c1}{// FIXME header?}
+\PYGcolorful{n}{env\PYGcolorfulZus{}t}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{get\PYGcolorfulZus{}global\PYGcolorfulZus{}env}\PYGcolorful{p}{();}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{()} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}alloc \PYGcolorfulZpc{}d\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{},cells\PYGcolorfulZus{}used);}
+
+  \PYGcolorful{c+cm}{/*if (free\PYGcolorfulZus{}list\PYGcolorfulZus{}avail\PYGcolorfulZlt{}free\PYGcolorfulZus{}list\PYGcolorfulZus{}consumed) \PYGcolorfulZob{}}
+\PYGcolorful{c+cm}{    // try gc}
+\PYGcolorful{c+cm}{    // FIXME need access to current frame}
+\PYGcolorful{c+cm}{    collect\PYGcolorfulZus{}garbage(get\PYGcolorfulZus{}global\PYGcolorfulZus{}env());}
+\PYGcolorful{c+cm}{  \PYGcolorfulZcb{}*/}
+
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}avail}\PYGcolorful{o}{\PYGcolorfulZgt{}}\PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}consumed}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{c+c1}{// serve from free list}
+    \PYGcolorful{k+kt}{int} \PYGcolorful{n}{idx} \PYGcolorful{o}{=} \PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}consumed}\PYGcolorful{p}{;}
+    \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{res} \PYGcolorful{o}{=} \PYGcolorful{n}{free\PYGcolorfulZus{}list}\PYGcolorful{p}{[}\PYGcolorful{n}{idx}\PYGcolorful{p}{];}
+    \PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}consumed}\PYGcolorful{o}{++}\PYGcolorful{p}{;}
+    \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}++ cell\PYGcolorfulZus{}alloc: recycled \PYGcolorfulZpc{}d (\PYGcolorfulZpc{}p)\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{},idx,res);}
+    \PYGcolorful{k}{return} \PYGcolorful{n}{res}\PYGcolorful{p}{;}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}} \PYGcolorful{k}{else} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{res} \PYGcolorful{o}{=} \PYGcolorful{o}{\PYGcolorfulZam{}}\PYGcolorful{n}{cell\PYGcolorfulZus{}heap}\PYGcolorful{p}{[}\PYGcolorful{n}{cells\PYGcolorfulZus{}used}\PYGcolorful{p}{];}
+    \PYGcolorful{n}{cells\PYGcolorfulZus{}used}\PYGcolorful{o}{++}\PYGcolorful{p}{;}
+    \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{cells\PYGcolorfulZus{}used}\PYGcolorful{o}{\PYGcolorfulZgt{}}\PYGcolorful{n}{MAX\PYGcolorfulZus{}CELLS}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+		\PYGcolorful{c+c1}{//@ADD START}
+
+		\PYGcolorful{c+c1}{//@ADD END}
+      \PYGcolorful{n}{printf}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}!! cell\PYGcolorfulZus{}alloc failed, MAX\PYGcolorfulZus{}CELLS used.}\PYGcolorful{l+s+se}{\PYGcolorfulZbs{}n}\PYGcolorful{l+s}{\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+      \PYGcolorful{n}{exit}\PYGcolorful{p}{(}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}++ cell\PYGcolorfulZus{}alloc: \PYGcolorfulZpc{}d \PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{},cells\PYGcolorfulZus{}used);}
+    \PYGcolorful{k}{return} \PYGcolorful{n}{res}\PYGcolorful{p}{;}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{bytes\PYGcolorfulZus{}alloc}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{int} \PYGcolorful{n}{num\PYGcolorfulZus{}bytes}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+\PYGcolorful{c+c1}{//\PYGcolorfulZsh{}ifdef SLEDGE\PYGcolorfulZus{}MALLOC}
+  \PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n}{new\PYGcolorfulZus{}mem} \PYGcolorful{o}{=} \PYGcolorful{n}{malloc}\PYGcolorful{p}{(}\PYGcolorful{n}{num\PYGcolorfulZus{}bytes}\PYGcolorful{p}{);}
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}bytes\PYGcolorfulZus{}alloc: \PYGcolorfulZpc{}p +\PYGcolorfulZpc{}d\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{},new\PYGcolorfulZus{}mem,num\PYGcolorfulZus{}bytes);}
+  \PYGcolorful{n}{memset}\PYGcolorful{p}{(}\PYGcolorful{n}{new\PYGcolorfulZus{}mem}\PYGcolorful{p}{,} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{,} \PYGcolorful{n}{num\PYGcolorfulZus{}bytes}\PYGcolorful{p}{);}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{new\PYGcolorfulZus{}mem}\PYGcolorful{p}{;}
+\PYGcolorful{c+c1}{//\PYGcolorfulZsh{}endif}
+    \PYGcolorful{c+cm}{/*void* new\PYGcolorfulZus{}mem = byte\PYGcolorfulZus{}heap + byte\PYGcolorfulZus{}heap\PYGcolorfulZus{}used;}
+\PYGcolorful{c+cm}{  if (byte\PYGcolorfulZus{}heap\PYGcolorfulZus{}used + num\PYGcolorfulZus{}bytes \PYGcolorfulZlt{} MAX\PYGcolorfulZus{}BYTE\PYGcolorfulZus{}HEAP) \PYGcolorfulZob{}}
+\PYGcolorful{c+cm}{    byte\PYGcolorfulZus{}heap\PYGcolorfulZus{}used += num\PYGcolorfulZus{}bytes;}
+\PYGcolorful{c+cm}{    //printf(\PYGcolorfulZdq{}++ byte\PYGcolorfulZus{}alloc: \PYGcolorfulZpc{}d (+\PYGcolorfulZpc{}d) \PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{},byte\PYGcolorfulZus{}heap\PYGcolorfulZus{}used,num\PYGcolorfulZus{}bytes);}
+\PYGcolorful{c+cm}{    return new\PYGcolorfulZus{}mem;}
+\PYGcolorful{c+cm}{  \PYGcolorfulZcb{} else \PYGcolorfulZob{}}
+\PYGcolorful{c+cm}{    printf(\PYGcolorfulZdq{}\PYGcolorfulZti{}\PYGcolorfulZti{} bytes\PYGcolorfulZus{}alloc: out of memory: \PYGcolorfulZpc{}d (\PYGcolorfulZpc{}d)\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{},byte\PYGcolorfulZus{}heap,byte\PYGcolorfulZus{}heap\PYGcolorfulZus{}used);}
+\PYGcolorful{c+cm}{    exit(1);}
+\PYGcolorful{c+cm}{    return NULL;}
+\PYGcolorful{c+cm}{    \PYGcolorfulZcb{}*/}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{k+kt}{void} \PYGcolorful{n+nf}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{c}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{o}{!}\PYGcolorful{n}{c}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}\PYGcolorfulZti{}! warning: mark\PYGcolorfulZus{}tree encountered NULL cell.\PYGcolorfulZbs{}n\PYGcolorfulZdq{});}
+    \PYGcolorful{k}{return}\PYGcolorful{p}{;}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{o}{!}\PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{\PYGcolorfulZam{}} \PYGcolorful{n}{TAG\PYGcolorfulZus{}MARK}\PYGcolorful{p}{))} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{c+cm}{/*char buf[80];}
+\PYGcolorful{c+cm}{    lisp\PYGcolorfulZus{}write(c, buf, 79);}
+\PYGcolorful{c+cm}{    printf(\PYGcolorfulZdq{}\PYGcolorfulZti{}\PYGcolorfulZti{} marking live: \PYGcolorfulZpc{}p \PYGcolorfulZpc{}s\PYGcolorfulZbs{}n\PYGcolorfulZdq{},c,buf);*/}
+
+    \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}CONS}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+      \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{)} \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{((}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{);}
+      \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next}\PYGcolorful{p}{)} \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{((}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next}\PYGcolorful{p}{);}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{k}{else} \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}SYM}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+      \PYGcolorful{c+c1}{// TODO: mark bytes in heap}
+      \PYGcolorful{c+c1}{// also for STR, BYTES}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{k}{else} \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}LAMBDA}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+      \PYGcolorful{c+cm}{/*static char buf[512];}
+\PYGcolorful{c+cm}{      lisp\PYGcolorfulZus{}write((Cell*)c\PYGcolorfulZhy{}\PYGcolorfulZgt{}ar.addr, buf, 511);}
+\PYGcolorful{c+cm}{      printf(\PYGcolorfulZdq{}\PYGcolorfulZti{}\PYGcolorfulZti{} mark lambda args: \PYGcolorfulZpc{}s\PYGcolorfulZbs{}n\PYGcolorfulZdq{},buf);*/}
+      \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{((}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{);} \PYGcolorful{c+c1}{// function arguments}
+      \PYGcolorful{c+c1}{//mark\PYGcolorfulZus{}tree((Cell*)c\PYGcolorfulZhy{}\PYGcolorfulZgt{}dr.next); // function body}
+
+      \PYGcolorful{c+c1}{// TODO: mark compiled code / free unused compiled code}
+      \PYGcolorful{c+c1}{// \PYGcolorfulZhy{}\PYGcolorfulZhy{} keep all compiled blobs in a list}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{k}{else} \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}BUILTIN}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+      \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{((}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next}\PYGcolorful{p}{);} \PYGcolorful{c+c1}{// builtin signature}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{k}{else} \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STREAM}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+      \PYGcolorful{n}{Stream}\PYGcolorful{o}{*} \PYGcolorful{n}{s} \PYGcolorful{o}{=} \PYGcolorful{p}{(}\PYGcolorful{n}{Stream}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{;}
+      \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{s}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+        \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{s}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{path}\PYGcolorful{p}{);}
+      \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{k}{else} \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}FS}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+      \PYGcolorful{n}{Filesystem}\PYGcolorful{o}{*} \PYGcolorful{n}{fs} \PYGcolorful{o}{=} \PYGcolorful{p}{(}\PYGcolorful{n}{Filesystem}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next}\PYGcolorful{p}{;}
+      \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{fs}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+        \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{fs}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{mount\PYGcolorfulZus{}point}\PYGcolorful{p}{);}
+        \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{fs}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{open\PYGcolorfulZus{}fn}\PYGcolorful{p}{);}
+        \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{fs}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{close\PYGcolorfulZus{}fn}\PYGcolorful{p}{);}
+        \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{fs}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{read\PYGcolorfulZus{}fn}\PYGcolorful{p}{);}
+        \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{fs}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{write\PYGcolorfulZus{}fn}\PYGcolorful{p}{);}
+        \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{fs}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{delete\PYGcolorfulZus{}fn}\PYGcolorful{p}{);}
+        \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{fs}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{mmap\PYGcolorfulZus{}fn}\PYGcolorful{p}{);}
+      \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{k}{else} \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}VEC} \PYGcolorful{o}{||} \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STRUCT} \PYGcolorful{o}{||} \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STRUCT\PYGcolorfulZus{}DEF}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+      \PYGcolorful{k+kt}{int} \PYGcolorful{n}{i}\PYGcolorful{o}{=}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+      \PYGcolorful{k+kt}{int} \PYGcolorful{n}{sz}\PYGcolorful{o}{=}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{p}{;}
+      \PYGcolorful{n}{Cell}\PYGcolorful{o}{**} \PYGcolorful{n}{elements}\PYGcolorful{o}{=}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{;}
+      \PYGcolorful{k}{for} \PYGcolorful{p}{(}\PYGcolorful{n}{i}\PYGcolorful{o}{=}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;} \PYGcolorful{n}{i}\PYGcolorful{o}{\PYGcolorfulZlt{}}\PYGcolorful{n}{sz}\PYGcolorful{p}{;} \PYGcolorful{n}{i}\PYGcolorful{o}{++}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+        \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{elements}\PYGcolorful{p}{[}\PYGcolorful{n}{i}\PYGcolorful{p}{]);}
+      \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+    \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{|=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}MARK}\PYGcolorful{p}{;}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{k}{static} \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{\PYGcolorfulZus{}symbols\PYGcolorfulZus{}list}\PYGcolorful{p}{;}
+\PYGcolorful{k+kt}{void} \PYGcolorful{n+nf}{list\PYGcolorfulZus{}symbols\PYGcolorfulZus{}iter}\PYGcolorful{p}{(}\PYGcolorful{k}{const} \PYGcolorful{k+kt}{char} \PYGcolorful{o}{*}\PYGcolorful{n}{key}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{void} \PYGcolorful{o}{*}\PYGcolorful{n}{value}\PYGcolorful{p}{,} \PYGcolorful{k}{const} \PYGcolorful{k+kt}{void} \PYGcolorful{o}{*}\PYGcolorful{n}{obj}\PYGcolorful{p}{)}
+\PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{env\PYGcolorfulZus{}entry}\PYGcolorful{o}{*} \PYGcolorful{n}{e} \PYGcolorful{o}{=} \PYGcolorful{p}{(}\PYGcolorful{n}{env\PYGcolorfulZus{}entry}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{value}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{\PYGcolorfulZus{}symbols\PYGcolorfulZus{}list} \PYGcolorful{o}{=} \PYGcolorful{n}{alloc\PYGcolorfulZus{}cons}\PYGcolorful{p}{(}\PYGcolorful{n}{alloc\PYGcolorfulZus{}sym}\PYGcolorful{p}{(}\PYGcolorful{n}{e}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{name}\PYGcolorful{p}{),} \PYGcolorful{n}{\PYGcolorfulZus{}symbols\PYGcolorfulZus{}list}\PYGcolorful{p}{);}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{list\PYGcolorfulZus{}symbols}\PYGcolorful{p}{(}\PYGcolorful{n}{env\PYGcolorfulZus{}t}\PYGcolorful{o}{*} \PYGcolorful{n}{global\PYGcolorfulZus{}env}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{\PYGcolorfulZus{}symbols\PYGcolorfulZus{}list} \PYGcolorful{o}{=} \PYGcolorful{n}{alloc\PYGcolorfulZus{}nil}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{sm\PYGcolorfulZus{}enum}\PYGcolorful{p}{(}\PYGcolorful{n}{global\PYGcolorfulZus{}env}\PYGcolorful{p}{,} \PYGcolorful{n}{list\PYGcolorfulZus{}symbols\PYGcolorfulZus{}iter}\PYGcolorful{p}{,} \PYGcolorful{n+nb}{NULL}\PYGcolorful{p}{);}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{\PYGcolorfulZus{}symbols\PYGcolorfulZus{}list}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{k+kt}{void} \PYGcolorful{n+nf}{collect\PYGcolorfulZus{}garbage\PYGcolorfulZus{}iter}\PYGcolorful{p}{(}\PYGcolorful{k}{const} \PYGcolorful{k+kt}{char} \PYGcolorful{o}{*}\PYGcolorful{n}{key}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{void} \PYGcolorful{o}{*}\PYGcolorful{n}{value}\PYGcolorful{p}{,} \PYGcolorful{k}{const} \PYGcolorful{k+kt}{void} \PYGcolorful{o}{*}\PYGcolorful{n}{obj}\PYGcolorful{p}{)}
+\PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{env\PYGcolorfulZus{}entry}\PYGcolorful{o}{*} \PYGcolorful{n}{e} \PYGcolorful{o}{=} \PYGcolorful{p}{(}\PYGcolorful{n}{env\PYGcolorfulZus{}entry}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{value}\PYGcolorful{p}{;}
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}key: \PYGcolorfulZpc{}s value: \PYGcolorfulZpc{}s\PYGcolorfulZbs{}n\PYGcolorfulZdq{}, key, value);}
+  \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{e}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{cell}\PYGcolorful{p}{);}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{c+c1}{//@add start}
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{collect\PYGcolorfulZus{}garbage\PYGcolorfulZus{}if\PYGcolorfulZus{}needed}\PYGcolorful{p}{(}\PYGcolorful{n}{env\PYGcolorfulZus{}t}\PYGcolorful{o}{*} \PYGcolorful{n}{global\PYGcolorfulZus{}env}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n}{stack\PYGcolorfulZus{}end}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n}{stack\PYGcolorfulZus{}pointer}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+	\PYGcolorful{k}{if}\PYGcolorful{p}{(}\PYGcolorful{n}{MAX\PYGcolorfulZus{}CELLS} \PYGcolorful{o}{\PYGcolorfulZhy{}} \PYGcolorful{n}{cells\PYGcolorfulZus{}used} \PYGcolorful{o}{+} \PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}avail} \PYGcolorful{o}{\PYGcolorfulZhy{}} \PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}consumed} \PYGcolorful{o}{\PYGcolorfulZlt{}} \PYGcolorful{n}{MAX\PYGcolorfulZus{}CELLS} \PYGcolorful{o}{/} \PYGcolorful{l+m+mi}{2}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+		\PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}run gc (free: \PYGcolorfulZpc{}d)\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{}, (MAX\PYGcolorfulZus{}CELLS \PYGcolorfulZhy{} cells\PYGcolorfulZus{}used + free\PYGcolorfulZus{}list\PYGcolorfulZus{}avail \PYGcolorfulZhy{} free\PYGcolorfulZus{}list\PYGcolorfulZus{}consumed) * 100 / MAX\PYGcolorfulZus{}CELLS);}
+		\PYGcolorful{n}{collect\PYGcolorfulZus{}garbage}\PYGcolorful{p}{(}\PYGcolorful{n}{global\PYGcolorfulZus{}env}\PYGcolorful{p}{,} \PYGcolorful{n}{stack\PYGcolorfulZus{}end}\PYGcolorful{p}{,} \PYGcolorful{n}{stack\PYGcolorfulZus{}pointer}\PYGcolorful{p}{);}
+	\PYGcolorful{p}{\PYGcolorfulZcb{}}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+\PYGcolorful{c+c1}{//@add end}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{collect\PYGcolorfulZus{}garbage}\PYGcolorful{p}{(}\PYGcolorful{n}{env\PYGcolorfulZus{}t}\PYGcolorful{o}{*} \PYGcolorful{n}{global\PYGcolorfulZus{}env}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n}{stack\PYGcolorfulZus{}end}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n}{stack\PYGcolorfulZus{}pointer}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{c+c1}{// mark}
+
+  \PYGcolorful{c+c1}{// check all symbols in the environment}
+  \PYGcolorful{c+c1}{// and look where they lead (cons trees, bytes, strings)}
+  \PYGcolorful{c+c1}{// mark all of them as usable}
+
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}[gc] stack at: \PYGcolorfulZpc{}p, stack end: \PYGcolorfulZpc{}p\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{},stack\PYGcolorfulZus{}pointer,stack\PYGcolorfulZus{}end);}
+
+  \PYGcolorful{k+kt}{int} \PYGcolorful{n}{gc}\PYGcolorful{o}{=}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{,} \PYGcolorful{n}{i}\PYGcolorful{p}{;}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}ifdef DEBUG\PYGcolorfulZus{}GC}
+  \PYGcolorful{k+kt}{int} \PYGcolorful{n}{highwater}\PYGcolorful{o}{=}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}endif}
+
+  \PYGcolorful{k+kt}{int} \PYGcolorful{n}{sw\PYGcolorfulZus{}state} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t}\PYGcolorful{o}{*} \PYGcolorful{n}{a}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{for} \PYGcolorful{p}{(}\PYGcolorful{n}{a}\PYGcolorful{o}{=}\PYGcolorful{p}{(}\PYGcolorful{n}{jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{stack\PYGcolorfulZus{}end}\PYGcolorful{p}{;} \PYGcolorful{n}{a}\PYGcolorful{o}{\PYGcolorfulZgt{}=}\PYGcolorful{p}{(}\PYGcolorful{n}{jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{stack\PYGcolorfulZus{}pointer}\PYGcolorful{p}{;} \PYGcolorful{n}{a}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZhy{}}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{n}{jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t} \PYGcolorful{n}{item} \PYGcolorful{o}{=} \PYGcolorful{o}{*}\PYGcolorful{n}{a}\PYGcolorful{p}{;}
+    \PYGcolorful{n}{jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t} \PYGcolorful{n}{next\PYGcolorfulZus{}item} \PYGcolorful{o}{=} \PYGcolorful{o}{*}\PYGcolorful{p}{(}\PYGcolorful{n}{a}\PYGcolorful{o}{\PYGcolorfulZhy{}}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);}
+    \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{next\PYGcolorfulZus{}item}\PYGcolorful{o}{==}\PYGcolorful{n}{STACK\PYGcolorfulZus{}FRAME\PYGcolorfulZus{}MARKER}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+      \PYGcolorful{n}{sw\PYGcolorfulZus{}state}\PYGcolorful{o}{=}\PYGcolorful{l+m+mi}{2}\PYGcolorful{p}{;}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}} \PYGcolorful{k}{else} \PYGcolorful{p}{\PYGcolorfulZob{}}
+      \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{sw\PYGcolorfulZus{}state}\PYGcolorful{o}{==}\PYGcolorful{l+m+mi}{2}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+        \PYGcolorful{n}{sw\PYGcolorfulZus{}state}\PYGcolorful{o}{=}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{;}
+      \PYGcolorful{p}{\PYGcolorfulZcb{}} \PYGcolorful{k}{else} \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{sw\PYGcolorfulZus{}state}\PYGcolorful{o}{==}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+        \PYGcolorful{c+c1}{// FIXME total hack, need type information for stack}
+        \PYGcolorful{c+c1}{// maybe type/signature byte frame header?}
+        \PYGcolorful{k}{if} \PYGcolorful{p}{((}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{item}\PYGcolorful{o}{\PYGcolorfulZgt{}}\PYGcolorful{n}{cell\PYGcolorfulZus{}heap}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+          \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{((}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{item}\PYGcolorful{p}{);}
+        \PYGcolorful{p}{\PYGcolorfulZcb{}}
+      \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+    \PYGcolorful{c+cm}{/*if (sw\PYGcolorfulZus{}state==2) \PYGcolorfulZob{}}
+\PYGcolorful{c+cm}{      printf(KMAG \PYGcolorfulZdq{}\PYGcolorfulZpc{}p: 0x\PYGcolorfulZpc{}08lx\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{} KWHT,a,item);}
+\PYGcolorful{c+cm}{    \PYGcolorfulZcb{}}
+\PYGcolorful{c+cm}{    else if (sw\PYGcolorfulZus{}state==1) \PYGcolorfulZob{}}
+\PYGcolorful{c+cm}{      printf(KCYN \PYGcolorfulZdq{}\PYGcolorfulZpc{}p: 0x\PYGcolorfulZpc{}08lx\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{} KWHT,a,item);}
+\PYGcolorful{c+cm}{    \PYGcolorfulZcb{}}
+\PYGcolorful{c+cm}{    else \PYGcolorfulZob{}}
+\PYGcolorful{c+cm}{      printf(KWHT \PYGcolorfulZdq{}\PYGcolorfulZpc{}p: 0x\PYGcolorfulZpc{}08lx\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{} KWHT,a,item);}
+\PYGcolorful{c+cm}{      \PYGcolorfulZcb{}*/}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}}
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}[gc] stack walk complete \PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZhy{}\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{});}
+
+  \PYGcolorful{n}{sm\PYGcolorfulZus{}enum}\PYGcolorful{p}{(}\PYGcolorful{n}{global\PYGcolorfulZus{}env}\PYGcolorful{p}{,} \PYGcolorful{n}{collect\PYGcolorfulZus{}garbage\PYGcolorfulZus{}iter}\PYGcolorful{p}{,} \PYGcolorful{n+nb}{NULL}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{mark\PYGcolorfulZus{}tree}\PYGcolorful{p}{(}\PYGcolorful{n}{get\PYGcolorfulZus{}fs\PYGcolorfulZus{}list}\PYGcolorful{p}{());}
+
+  \PYGcolorful{c+cm}{/*for (env\PYGcolorfulZus{}entry* e=global\PYGcolorfulZus{}env; e != NULL; e=e\PYGcolorfulZhy{}\PYGcolorfulZgt{}hh.next) \PYGcolorfulZob{}}
+\PYGcolorful{c+cm}{    //printf(\PYGcolorfulZdq{}env entry: \PYGcolorfulZpc{}s pointing to \PYGcolorfulZpc{}p\PYGcolorfulZbs{}n\PYGcolorfulZdq{},e\PYGcolorfulZhy{}\PYGcolorfulZgt{}name,e\PYGcolorfulZhy{}\PYGcolorfulZgt{}cell);}
+\PYGcolorful{c+cm}{    if (!e\PYGcolorfulZhy{}\PYGcolorfulZgt{}cell) \PYGcolorfulZob{}}
+\PYGcolorful{c+cm}{      //printf(\PYGcolorfulZdq{}\PYGcolorfulZti{}! warning: NULL env entry \PYGcolorfulZpc{}s.\PYGcolorfulZbs{}n\PYGcolorfulZdq{},e\PYGcolorfulZhy{}\PYGcolorfulZgt{}name);}
+\PYGcolorful{c+cm}{    \PYGcolorfulZcb{}}
+\PYGcolorful{c+cm}{    mark\PYGcolorfulZus{}tree(e\PYGcolorfulZhy{}\PYGcolorfulZgt{}cell);}
+\PYGcolorful{c+cm}{  \PYGcolorfulZcb{}*/}
+
+  \PYGcolorful{c+c1}{// sweep \PYGcolorfulZhy{}\PYGcolorfulZhy{} free all things that are not marked}
+
+  \PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}avail} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}consumed} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}ifdef DEBUG\PYGcolorfulZus{}GC}
+  \PYGcolorful{n}{printf}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}\PYGcolorfulZbs{}e[1;1H\PYGcolorfulZbs{}e[2J\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{printf}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}\PYGcolorfulZti{}\PYGcolorfulZti{} cell memory: \PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}endif}
+
+  \PYGcolorful{k}{for} \PYGcolorful{p}{(}\PYGcolorful{n}{i}\PYGcolorful{o}{=}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;} \PYGcolorful{n}{i}\PYGcolorful{o}{\PYGcolorfulZlt{}}\PYGcolorful{n}{cells\PYGcolorfulZus{}used}\PYGcolorful{p}{;} \PYGcolorful{n}{i}\PYGcolorful{o}{++}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{c} \PYGcolorful{o}{=} \PYGcolorful{o}{\PYGcolorfulZam{}}\PYGcolorful{n}{cell\PYGcolorfulZus{}heap}\PYGcolorful{p}{[}\PYGcolorful{n}{i}\PYGcolorful{p}{];}
+    \PYGcolorful{c+c1}{// FIXME: we cannot free LAMBDAS currently}
+    \PYGcolorful{c+c1}{// because nobody points to anonymous closures.}
+    \PYGcolorful{c+c1}{// this has to be fixed by introducing metadata to their callers. (?)}
+    \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{o}{!}\PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{\PYGcolorfulZam{}} \PYGcolorful{n}{TAG\PYGcolorfulZus{}MARK}\PYGcolorful{p}{)} \PYGcolorful{o}{\PYGcolorfulZam{}\PYGcolorfulZam{}} \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag}\PYGcolorful{o}{!=}\PYGcolorful{n}{TAG\PYGcolorfulZus{}LAMBDA}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}ifdef DEBUG\PYGcolorfulZus{}GC}
+      \PYGcolorful{n}{printf}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}.\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}endif}
+      \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}BYTES} \PYGcolorful{o}{||} \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STR}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+        \PYGcolorful{c+c1}{//free(c\PYGcolorfulZhy{}\PYGcolorfulZgt{}ar.addr);}
+      \PYGcolorful{p}{\PYGcolorfulZcb{}}
+      \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}FREED}\PYGcolorful{p}{;}
+
+      \PYGcolorful{n}{free\PYGcolorfulZus{}list}\PYGcolorful{p}{[}\PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}avail}\PYGcolorful{p}{]} \PYGcolorful{o}{=} \PYGcolorful{n}{c}\PYGcolorful{p}{;}
+      \PYGcolorful{n}{free\PYGcolorfulZus{}list\PYGcolorfulZus{}avail}\PYGcolorful{o}{++}\PYGcolorful{p}{;}
+      \PYGcolorful{n}{gc}\PYGcolorful{o}{++}\PYGcolorful{p}{;}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}} \PYGcolorful{k}{else} \PYGcolorful{p}{\PYGcolorfulZob{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}ifdef DEBUG\PYGcolorfulZus{}GC}
+      \PYGcolorful{n}{highwater} \PYGcolorful{o}{=} \PYGcolorful{n}{i}\PYGcolorful{p}{;}
+      \PYGcolorful{n}{printf}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}o\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}endif}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{c+c1}{// unset mark bit}
+    \PYGcolorful{n}{cell\PYGcolorfulZus{}heap}\PYGcolorful{p}{[}\PYGcolorful{n}{i}\PYGcolorful{p}{].}\PYGcolorful{n}{tag} \PYGcolorful{o}{\PYGcolorfulZam{}=} \PYGcolorful{o}{\PYGcolorfulZti{}}\PYGcolorful{n}{TAG\PYGcolorfulZus{}MARK}\PYGcolorful{p}{;}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}[gc] highwater \PYGcolorfulZpc{}d fl\PYGcolorfulZus{}avail \PYGcolorfulZpc{}d \PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{},highwater,free\PYGcolorfulZus{}list\PYGcolorfulZus{}avail);}
+
+  \PYGcolorful{c+c1}{// FIXME on x64, this line causes corruption over time }
+  \PYGcolorful{c+c1}{//cells\PYGcolorfulZus{}used = highwater+1;}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}ifdef DEBUG\PYGcolorfulZus{}GC}
+  \PYGcolorful{n}{printf}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}}\PYGcolorful{l+s+se}{\PYGcolorfulZbs{}n\PYGcolorfulZbs{}n}\PYGcolorful{l+s}{\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{printf}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}\PYGcolorfulZti{}\PYGcolorfulZti{} \PYGcolorfulZpc{}d of \PYGcolorfulZpc{}d cells were garbage.}\PYGcolorful{l+s+se}{\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n}\PYGcolorful{l+s}{\PYGcolorfulZdq{}}\PYGcolorful{p}{,}\PYGcolorful{n}{gc}\PYGcolorful{p}{,}\PYGcolorful{n}{cells\PYGcolorfulZus{}used}\PYGcolorful{p}{);}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}endif}
+
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}\PYGcolorfulZhy{}\PYGcolorfulZhy{} \PYGcolorfulZpc{}d high water mark.\PYGcolorfulZbs{}n\PYGcolorfulZbs{}n\PYGcolorfulZdq{},cells\PYGcolorfulZus{}used);}
+
+  \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}int}\PYGcolorful{p}{(}\PYGcolorful{n}{gc}\PYGcolorful{p}{);}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{cell\PYGcolorfulZus{}realloc}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n}{old\PYGcolorfulZus{}addr}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{unsigned} \PYGcolorful{k+kt}{int} \PYGcolorful{n}{old\PYGcolorfulZus{}size}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{unsigned} \PYGcolorful{k+kt}{int} \PYGcolorful{n}{num\PYGcolorfulZus{}bytes}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{c+c1}{// FIXME}
+  \PYGcolorful{c+c1}{//cell\PYGcolorfulZus{}free(old\PYGcolorfulZus{}addr, old\PYGcolorfulZus{}size);}
+  \PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n}{new} \PYGcolorful{o}{=} \PYGcolorful{n}{bytes\PYGcolorfulZus{}alloc}\PYGcolorful{p}{(}\PYGcolorful{n}{num\PYGcolorfulZus{}bytes}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{memcpy}\PYGcolorful{p}{(}\PYGcolorful{n}{new}\PYGcolorful{p}{,} \PYGcolorful{n}{old\PYGcolorfulZus{}addr}\PYGcolorful{p}{,} \PYGcolorful{n}{old\PYGcolorfulZus{}size}\PYGcolorful{p}{);}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{new}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{MemStats}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}stats}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{void}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{mem\PYGcolorfulZus{}stats}\PYGcolorful{p}{.}\PYGcolorful{n}{byte\PYGcolorfulZus{}heap\PYGcolorfulZus{}used} \PYGcolorful{o}{=} \PYGcolorful{n}{byte\PYGcolorfulZus{}heap\PYGcolorfulZus{}used}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{mem\PYGcolorfulZus{}stats}\PYGcolorful{p}{.}\PYGcolorful{n}{byte\PYGcolorfulZus{}heap\PYGcolorfulZus{}max} \PYGcolorful{o}{=} \PYGcolorful{n}{MAX\PYGcolorfulZus{}BYTE\PYGcolorfulZus{}HEAP}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{mem\PYGcolorfulZus{}stats}\PYGcolorful{p}{.}\PYGcolorful{n}{cells\PYGcolorfulZus{}used} \PYGcolorful{o}{=} \PYGcolorful{n}{cells\PYGcolorfulZus{}used}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{mem\PYGcolorfulZus{}stats}\PYGcolorful{p}{.}\PYGcolorful{n}{cells\PYGcolorfulZus{}max} \PYGcolorful{o}{=} \PYGcolorful{n}{MAX\PYGcolorfulZus{}CELLS}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{return} \PYGcolorful{o}{\PYGcolorfulZam{}}\PYGcolorful{n}{mem\PYGcolorfulZus{}stats}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}cons}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{ar}\PYGcolorful{p}{,} \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{dr}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}alloc\PYGcolorfulZus{}cons: ar \PYGcolorfulZpc{}p dr \PYGcolorfulZpc{}p\PYGcolorfulZbs{}n\PYGcolorfulZdq{},ar,dr);}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{cons} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{cons}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}CONS}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{cons}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{ar}\PYGcolorful{p}{;} \PYGcolorful{c+c1}{//?alloc\PYGcolorfulZus{}clone(ar):ar;}
+  \PYGcolorful{n}{cons}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next} \PYGcolorful{o}{=} \PYGcolorful{n}{dr}\PYGcolorful{p}{;} \PYGcolorful{c+c1}{//?alloc\PYGcolorfulZus{}clone(dr):dr;}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{cons}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}list}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{**} \PYGcolorful{n}{items}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{int} \PYGcolorful{n}{num}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{list} \PYGcolorful{o}{=} \PYGcolorful{n}{alloc\PYGcolorfulZus{}nil}\PYGcolorful{p}{();}
+  \PYGcolorful{k+kt}{int} \PYGcolorful{n}{i}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{for} \PYGcolorful{p}{(}\PYGcolorful{n}{i}\PYGcolorful{o}{=}\PYGcolorful{n}{num}\PYGcolorful{o}{\PYGcolorfulZhy{}}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{;} \PYGcolorful{n}{i}\PYGcolorful{o}{\PYGcolorfulZgt{}=}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;} \PYGcolorful{n}{i}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZhy{}}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{n}{list} \PYGcolorful{o}{=} \PYGcolorful{n}{alloc\PYGcolorfulZus{}cons}\PYGcolorful{p}{(}\PYGcolorful{n}{items}\PYGcolorful{p}{[}\PYGcolorful{n}{i}\PYGcolorful{p}{],} \PYGcolorful{n}{list}\PYGcolorful{p}{);}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{list}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{c+c1}{//extern void uart\PYGcolorfulZus{}puts(char* str);}
+\PYGcolorful{k}{extern} \PYGcolorful{k+kt}{void} \PYGcolorful{n+nf}{memdump}\PYGcolorful{p}{(}\PYGcolorful{n}{jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t} \PYGcolorful{n}{start}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{size\PYGcolorfulZus{}t} \PYGcolorful{n}{len}\PYGcolorful{p}{,}\PYGcolorful{k+kt}{int} \PYGcolorful{n}{raw}\PYGcolorful{p}{);}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}sym}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{char}\PYGcolorful{o}{*} \PYGcolorful{n}{str}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{sym} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}++ alloc sym at \PYGcolorfulZpc{}p \PYGcolorfulZpc{}p \PYGcolorfulZpc{}d\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{},sym,sym\PYGcolorfulZhy{}\PYGcolorfulZgt{}ar.addr,sym\PYGcolorfulZhy{}\PYGcolorfulZgt{}size);}
+
+  \PYGcolorful{n}{sym}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}SYM}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{str}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{k+kt}{int} \PYGcolorful{n}{sz} \PYGcolorful{o}{=} \PYGcolorful{n}{strlen}\PYGcolorful{p}{(}\PYGcolorful{n}{str}\PYGcolorful{p}{)}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{;}
+    \PYGcolorful{n}{sym}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{n}{sz}\PYGcolorful{p}{;}
+    \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}alloc\PYGcolorfulZus{}sym: \PYGcolorfulZpc{}s (\PYGcolorfulZpc{}d)\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{},str,sz);}
+    \PYGcolorful{c+c1}{//memdump(sym,sizeof(Cell),0);}
+
+    \PYGcolorful{n}{sym}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{bytes\PYGcolorfulZus{}alloc}\PYGcolorful{p}{(}\PYGcolorful{n}{sz}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);}
+
+    \PYGcolorful{c+c1}{//memdump(sym,sizeof(Cell),0);}
+
+    \PYGcolorful{n}{memcpy}\PYGcolorful{p}{(}\PYGcolorful{n}{sym}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{,} \PYGcolorful{n}{str}\PYGcolorful{p}{,} \PYGcolorful{n}{sz}\PYGcolorful{p}{);}
+
+    \PYGcolorful{c+c1}{//memdump(sym,sizeof(Cell),0);}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}} \PYGcolorful{k}{else} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{n}{sym}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+    \PYGcolorful{n}{sym}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{sym}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}int}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{int} \PYGcolorful{n}{i}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}++ alloc\PYGcolorfulZus{}int \PYGcolorfulZpc{}d\PYGcolorfulZbs{}r\PYGcolorfulZbs{}n\PYGcolorfulZdq{},i);}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{num} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{num}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}INT}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{num}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{value} \PYGcolorful{o}{=} \PYGcolorful{n}{i}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{num}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}num\PYGcolorfulZus{}bytes}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{unsigned} \PYGcolorful{k+kt}{int} \PYGcolorful{n}{num\PYGcolorfulZus{}bytes}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{cell} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{bytes\PYGcolorfulZus{}alloc}\PYGcolorful{p}{(}\PYGcolorful{n}{num\PYGcolorfulZus{}bytes}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);} \PYGcolorful{c+c1}{// 1 zeroed byte more to defeat clib\PYGcolorfulZhy{}str overflows}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}BYTES}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{n}{num\PYGcolorfulZus{}bytes}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{cell}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}bytes}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{void}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}num\PYGcolorfulZus{}bytes}\PYGcolorful{p}{(}\PYGcolorful{n}{SYM\PYGcolorfulZus{}INIT\PYGcolorfulZus{}BUFFER\PYGcolorfulZus{}SIZE}\PYGcolorful{p}{);}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}num\PYGcolorfulZus{}string}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{unsigned} \PYGcolorful{k+kt}{int} \PYGcolorful{n}{num\PYGcolorfulZus{}bytes}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{cell} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{bytes\PYGcolorfulZus{}alloc}\PYGcolorful{p}{(}\PYGcolorful{n}{num\PYGcolorfulZus{}bytes}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);} \PYGcolorful{c+c1}{// 1 zeroed byte more to defeat clib\PYGcolorfulZhy{}str overflows}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STR}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{n}{num\PYGcolorfulZus{}bytes}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{cell}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}substr}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{str}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{unsigned} \PYGcolorful{k+kt}{int} \PYGcolorful{n}{from}\PYGcolorful{p}{,} \PYGcolorful{k+kt}{unsigned} \PYGcolorful{k+kt}{int} \PYGcolorful{n}{len}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{cell}\PYGcolorful{p}{;}
+
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{o}{!}\PYGcolorful{n}{str}\PYGcolorful{p}{)} \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}string\PYGcolorfulZus{}copy}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{str}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag}\PYGcolorful{o}{!=}\PYGcolorful{n}{TAG\PYGcolorfulZus{}BYTES} \PYGcolorful{o}{\PYGcolorfulZam{}\PYGcolorfulZam{}} \PYGcolorful{n}{str}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag}\PYGcolorful{o}{!=}\PYGcolorful{n}{TAG\PYGcolorfulZus{}STR}\PYGcolorful{p}{)} \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}string\PYGcolorfulZus{}copy}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}substr \PYGcolorfulZpc{}s \PYGcolorfulZpc{}d \PYGcolorfulZpc{}d\PYGcolorfulZbs{}n\PYGcolorfulZdq{},str\PYGcolorfulZhy{}\PYGcolorfulZgt{}ar.addr,from,len);}
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{from}\PYGcolorful{o}{\PYGcolorfulZgt{}=}\PYGcolorful{n}{str}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{p}{)} \PYGcolorful{n}{from}\PYGcolorful{o}{=}\PYGcolorful{n}{str}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{o}{\PYGcolorfulZhy{}}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{len}\PYGcolorful{o}{+}\PYGcolorful{n}{from}\PYGcolorful{o}{\PYGcolorfulZgt{}}\PYGcolorful{n}{str}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{p}{)} \PYGcolorful{n}{len}\PYGcolorful{o}{=}\PYGcolorful{n}{str}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{o}{\PYGcolorfulZhy{}}\PYGcolorful{n}{from}\PYGcolorful{p}{;} \PYGcolorful{c+c1}{// FIXME TEST}
+
+  \PYGcolorful{n}{cell} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{bytes\PYGcolorfulZus{}alloc}\PYGcolorful{p}{(}\PYGcolorful{n}{len}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);} \PYGcolorful{c+c1}{// 1 zeroed byte more to defeat clib\PYGcolorfulZhy{}str overflows}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STR}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{n}{len}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{memcpy}\PYGcolorful{p}{(}\PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{,} \PYGcolorful{p}{(}\PYGcolorful{k+kt}{uint8\PYGcolorfulZus{}t}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{str}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{o}{+}\PYGcolorful{n}{from}\PYGcolorful{p}{,} \PYGcolorful{n}{len}\PYGcolorful{p}{);}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{cell}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}string}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{void}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}num\PYGcolorfulZus{}string}\PYGcolorful{p}{(}\PYGcolorful{n}{SYM\PYGcolorfulZus{}INIT\PYGcolorfulZus{}BUFFER\PYGcolorfulZus{}SIZE}\PYGcolorful{p}{);}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}string\PYGcolorfulZus{}copy}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{char}\PYGcolorful{o}{*} \PYGcolorful{n}{str}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{cell} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{bytes\PYGcolorfulZus{}alloc}\PYGcolorful{p}{(}\PYGcolorful{n}{strlen}\PYGcolorful{p}{(}\PYGcolorful{n}{str}\PYGcolorful{p}{)}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{strcpy}\PYGcolorful{p}{(}\PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{,} \PYGcolorful{n}{str}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STR}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{n}{strlen}\PYGcolorful{p}{(}\PYGcolorful{n}{str}\PYGcolorful{p}{)}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{cell}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}string\PYGcolorfulZus{}from\PYGcolorfulZus{}bytes}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{bytes}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{cell}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{o}{!}\PYGcolorful{n}{bytes}\PYGcolorful{p}{)} \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}string\PYGcolorfulZus{}copy}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{bytes}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag}\PYGcolorful{o}{!=}\PYGcolorful{n}{TAG\PYGcolorfulZus{}BYTES} \PYGcolorful{o}{\PYGcolorfulZam{}\PYGcolorfulZam{}} \PYGcolorful{n}{bytes}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag}\PYGcolorful{o}{!=}\PYGcolorful{n}{TAG\PYGcolorfulZus{}STR}\PYGcolorful{p}{)} \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}string\PYGcolorfulZus{}copy}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{bytes}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{o}{\PYGcolorfulZlt{}}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}string\PYGcolorfulZus{}copy}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+
+  \PYGcolorful{n}{cell} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{bytes\PYGcolorfulZus{}alloc}\PYGcolorful{p}{(}\PYGcolorful{n}{bytes}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{memcpy}\PYGcolorful{p}{(}\PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{,} \PYGcolorful{n}{bytes}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{,} \PYGcolorful{n}{bytes}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{p}{);}
+  \PYGcolorful{p}{((}\PYGcolorful{k+kt}{char}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{)[}\PYGcolorful{n}{bytes}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{p}{]}\PYGcolorful{o}{=}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STR}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{n}{bytes}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{cell}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}concat}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{str1}\PYGcolorful{p}{,} \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{str2}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{cell}\PYGcolorful{p}{;}
+  \PYGcolorful{k+kt}{int} \PYGcolorful{n}{size1}\PYGcolorful{p}{,} \PYGcolorful{n}{size2}\PYGcolorful{p}{,} \PYGcolorful{n}{newsize}\PYGcolorful{p}{;}
+
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{o}{!}\PYGcolorful{n}{str1} \PYGcolorful{o}{||} \PYGcolorful{o}{!}\PYGcolorful{n}{str2}\PYGcolorful{p}{)} \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}string\PYGcolorfulZus{}copy}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{str1}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag}\PYGcolorful{o}{!=}\PYGcolorful{n}{TAG\PYGcolorfulZus{}BYTES} \PYGcolorful{o}{\PYGcolorfulZam{}\PYGcolorfulZam{}} \PYGcolorful{n}{str1}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag}\PYGcolorful{o}{!=}\PYGcolorful{n}{TAG\PYGcolorfulZus{}STR}\PYGcolorful{p}{)} \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}string\PYGcolorfulZus{}copy}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{str2}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag}\PYGcolorful{o}{!=}\PYGcolorful{n}{TAG\PYGcolorfulZus{}BYTES} \PYGcolorful{o}{\PYGcolorfulZam{}\PYGcolorfulZam{}} \PYGcolorful{n}{str2}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag}\PYGcolorful{o}{!=}\PYGcolorful{n}{TAG\PYGcolorfulZus{}STR}\PYGcolorful{p}{)} \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}string\PYGcolorfulZus{}copy}\PYGcolorful{p}{(}\PYGcolorful{l+s}{\PYGcolorfulZdq{}\PYGcolorfulZdq{}}\PYGcolorful{p}{);}
+
+  \PYGcolorful{n}{cell} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+
+  \PYGcolorful{n}{size1} \PYGcolorful{o}{=} \PYGcolorful{n}{strlen}\PYGcolorful{p}{(}\PYGcolorful{n}{str1}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{);} \PYGcolorful{c+c1}{// ,str2\PYGcolorfulZhy{}\PYGcolorfulZgt{}size}
+  \PYGcolorful{n}{size2} \PYGcolorful{o}{=} \PYGcolorful{n}{strlen}\PYGcolorful{p}{(}\PYGcolorful{n}{str2}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{newsize} \PYGcolorful{o}{=} \PYGcolorful{n}{size1}\PYGcolorful{o}{+}\PYGcolorful{n}{size2}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{bytes\PYGcolorfulZus{}alloc}\PYGcolorful{p}{(}\PYGcolorful{n}{newsize}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{n}{newsize}\PYGcolorful{p}{;}
+
+  \PYGcolorful{n}{strncpy}\PYGcolorful{p}{(}\PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{,} \PYGcolorful{n}{str1}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{,} \PYGcolorful{n}{size1}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{strncpy}\PYGcolorful{p}{(}\PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{o}{+}\PYGcolorful{n}{size1}\PYGcolorful{p}{,} \PYGcolorful{n}{str2}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{,} \PYGcolorful{l+m+mi}{1}\PYGcolorful{o}{+}\PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{o}{\PYGcolorfulZhy{}}\PYGcolorful{n}{size1}\PYGcolorful{p}{);}
+  \PYGcolorful{p}{((}\PYGcolorful{k+kt}{char}\PYGcolorful{o}{*}\PYGcolorful{p}{)}\PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{)[}\PYGcolorful{n}{newsize}\PYGcolorful{p}{]}\PYGcolorful{o}{=}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STR}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{cell}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{n}{newsize}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{cell}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}builtin}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{unsigned} \PYGcolorful{k+kt}{int} \PYGcolorful{n}{b}\PYGcolorful{p}{,} \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{signature}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{num} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{num}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}BUILTIN}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{num}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{value} \PYGcolorful{o}{=} \PYGcolorful{n}{b}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{num}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next} \PYGcolorful{o}{=} \PYGcolorful{n}{signature}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{num}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}lambda}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{args}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{l} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{l}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}LAMBDA}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{l}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{args}\PYGcolorful{p}{;} \PYGcolorful{c+c1}{// arguments}
+  \PYGcolorful{c+c1}{//l\PYGcolorfulZhy{}\PYGcolorfulZgt{}dr.next = cdr(def); // body}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{l}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}nil}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{void}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{alloc\PYGcolorfulZus{}cons}\PYGcolorful{p}{(}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{,}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{);}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}vector}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{int} \PYGcolorful{n}{size}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{c} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}VEC}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{malloc}\PYGcolorful{p}{(}\PYGcolorful{n}{size} \PYGcolorful{o}{*} \PYGcolorful{k}{sizeof}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{void}\PYGcolorful{o}{*}\PYGcolorful{p}{));}
+  \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{n}{size}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{c}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}struct\PYGcolorfulZus{}def}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{int} \PYGcolorful{n}{size}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{c} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STRUCT\PYGcolorfulZus{}DEF}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{malloc}\PYGcolorful{p}{(}\PYGcolorful{n}{size} \PYGcolorful{o}{*} \PYGcolorful{k}{sizeof}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{void}\PYGcolorful{o}{*}\PYGcolorful{p}{));}
+  \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{n}{size}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{c}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}struct}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{struct\PYGcolorfulZus{}def}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{**} \PYGcolorful{n}{elements}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{**} \PYGcolorful{n}{def\PYGcolorfulZus{}elements}\PYGcolorful{p}{;}
+  \PYGcolorful{k+kt}{int} \PYGcolorful{n}{num\PYGcolorfulZus{}fields} \PYGcolorful{o}{=} \PYGcolorful{n}{struct\PYGcolorfulZus{}def}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{o}{/}\PYGcolorful{l+m+mi}{2}\PYGcolorful{p}{;}
+  \PYGcolorful{k+kt}{int} \PYGcolorful{n}{i}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{result} \PYGcolorful{o}{=} \PYGcolorful{n}{alloc\PYGcolorfulZus{}vector}\PYGcolorful{p}{(}\PYGcolorful{n}{num\PYGcolorfulZus{}fields}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);}
+  \PYGcolorful{n}{def\PYGcolorfulZus{}elements} \PYGcolorful{o}{=} \PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{**}\PYGcolorful{p}{)}\PYGcolorful{n}{struct\PYGcolorfulZus{}def}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{elements} \PYGcolorful{o}{=} \PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{**}\PYGcolorful{p}{)}\PYGcolorful{n}{result}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{;}
+
+  \PYGcolorful{c+c1}{// element zero points to the structure definition}
+  \PYGcolorful{n}{elements}\PYGcolorful{p}{[}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{]} \PYGcolorful{o}{=} \PYGcolorful{n}{struct\PYGcolorfulZus{}def}\PYGcolorful{p}{;}
+
+  \PYGcolorful{k}{for} \PYGcolorful{p}{(}\PYGcolorful{n}{i}\PYGcolorful{o}{=}\PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;} \PYGcolorful{n}{i}\PYGcolorful{o}{\PYGcolorfulZlt{}}\PYGcolorful{n}{num\PYGcolorfulZus{}fields}\PYGcolorful{p}{;} \PYGcolorful{n}{i}\PYGcolorful{o}{++}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{n}{elements}\PYGcolorful{p}{[}\PYGcolorful{n}{i}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{]} \PYGcolorful{o}{=} \PYGcolorful{n}{alloc\PYGcolorfulZus{}clone}\PYGcolorful{p}{(}\PYGcolorful{n}{def\PYGcolorfulZus{}elements}\PYGcolorful{p}{[}\PYGcolorful{n}{i}\PYGcolorful{o}{*}\PYGcolorful{l+m+mi}{2}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{]);}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}}
+  \PYGcolorful{n}{result}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STRUCT}\PYGcolorful{p}{;}
+
+  \PYGcolorful{k}{return} \PYGcolorful{n}{result}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{k+kt}{int} \PYGcolorful{n+nf}{is\PYGcolorfulZus{}nil}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{c}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{k}{return} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{==}\PYGcolorful{n+nb}{NULL} \PYGcolorful{o}{||} \PYGcolorful{p}{(}\PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{o}{==}\PYGcolorful{n+nb}{NULL} \PYGcolorful{o}{\PYGcolorfulZam{}\PYGcolorfulZam{}} \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next}\PYGcolorful{o}{==}\PYGcolorful{n+nb}{NULL}\PYGcolorful{p}{));}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}error}\PYGcolorful{p}{(}\PYGcolorful{k+kt}{unsigned} \PYGcolorful{k+kt}{int} \PYGcolorful{n}{code}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{c} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{=} \PYGcolorful{n}{TAG\PYGcolorfulZus{}ERROR}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{value} \PYGcolorful{o}{=} \PYGcolorful{n}{code}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{c}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{c}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+
+\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n+nf}{alloc\PYGcolorfulZus{}clone}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{orig}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{clone}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{o}{!}\PYGcolorful{n}{orig}\PYGcolorful{p}{)} \PYGcolorful{k}{return} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+
+  \PYGcolorful{n}{clone} \PYGcolorful{o}{=} \PYGcolorful{n}{cell\PYGcolorfulZus{}alloc}\PYGcolorful{p}{();}
+  \PYGcolorful{n}{clone}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag}  \PYGcolorful{o}{=} \PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{clone}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{clone}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next} \PYGcolorful{o}{=} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{clone}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size} \PYGcolorful{o}{=} \PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{p}{;}
+
+  \PYGcolorful{c+c1}{//printf(\PYGcolorfulZdq{}cloning a \PYGcolorfulZpc{}d (value \PYGcolorfulZpc{}d)\PYGcolorfulZbs{}n\PYGcolorfulZdq{},orig\PYGcolorfulZhy{}\PYGcolorfulZgt{}tag,orig\PYGcolorfulZhy{}\PYGcolorfulZgt{}ar.value);}
+
+  \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}SYM} \PYGcolorful{o}{||} \PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}STR} \PYGcolorful{o}{||} \PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}BYTES}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{n}{clone}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{bytes\PYGcolorfulZus{}alloc}\PYGcolorful{p}{(}\PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{o}{+}\PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{);}
+    \PYGcolorful{n}{memcpy}\PYGcolorful{p}{(}\PYGcolorful{n}{clone}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{,} \PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{,} \PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{size}\PYGcolorful{p}{);}
+  \PYGcolorful{c+cm}{/*\PYGcolorfulZcb{} else if (orig\PYGcolorfulZhy{}\PYGcolorfulZgt{}tag == TAG\PYGcolorfulZus{}BYTES) \PYGcolorfulZob{}}
+\PYGcolorful{c+cm}{    clone\PYGcolorfulZhy{}\PYGcolorfulZgt{}ar.addr = bytes\PYGcolorfulZus{}alloc(orig\PYGcolorfulZhy{}\PYGcolorfulZgt{}dr.size);}
+\PYGcolorful{c+cm}{    memcpy(clone\PYGcolorfulZhy{}\PYGcolorfulZgt{}ar.addr, orig\PYGcolorfulZhy{}\PYGcolorfulZgt{}ar.addr, orig\PYGcolorfulZhy{}\PYGcolorfulZgt{}dr.size);*/}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}} \PYGcolorful{k}{else} \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{tag} \PYGcolorful{o}{==} \PYGcolorful{n}{TAG\PYGcolorfulZus{}CONS}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+      \PYGcolorful{n}{clone}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{alloc\PYGcolorfulZus{}clone}\PYGcolorful{p}{(}\PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{);}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+    \PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next}\PYGcolorful{p}{)} \PYGcolorful{p}{\PYGcolorfulZob{}}
+      \PYGcolorful{n}{clone}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next} \PYGcolorful{o}{=} \PYGcolorful{n}{alloc\PYGcolorfulZus{}clone}\PYGcolorful{p}{(}\PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next}\PYGcolorful{p}{);}
+    \PYGcolorful{p}{\PYGcolorfulZcb{}}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}} \PYGcolorful{k}{else} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{n}{clone}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr} \PYGcolorful{o}{=} \PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{ar}\PYGcolorful{p}{.}\PYGcolorful{n}{addr}\PYGcolorful{p}{;}
+    \PYGcolorful{n}{clone}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next} \PYGcolorful{o}{=} \PYGcolorful{n}{orig}\PYGcolorful{o}{\PYGcolorfulZhy{}\PYGcolorfulZgt{}}\PYGcolorful{n}{dr}\PYGcolorful{p}{.}\PYGcolorful{n}{next}\PYGcolorful{p}{;}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}}
+  \PYGcolorful{k}{return} \PYGcolorful{n}{clone}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}}
+\end{Verbatim}

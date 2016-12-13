@@ -1,0 +1,105 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}ifndef MINILISP\PYGcolorfulZus{}H}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define MINILISP\PYGcolorfulZus{}H}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}if \PYGcolorfulZus{}\PYGcolorfulZus{}AMIGA}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define uint8\PYGcolorfulZus{}t unsigned char}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define uint16\PYGcolorfulZus{}t unsigned short}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define uint32\PYGcolorfulZus{}t unsigned long}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define uint64\PYGcolorfulZus{}t unsigned long long}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}else}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}include} \PYGcolorful{c+cpf}{\PYGcolorfulZlt{}stdint.h\PYGcolorfulZgt{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}endif}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}if CPU\PYGcolorfulZus{}X64}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t uint64\PYGcolorfulZus{}t}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}else}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t uint32\PYGcolorfulZus{}t}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}endif}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}include} \PYGcolorful{c+cpf}{\PYGcolorfulZdq{}strmap.h\PYGcolorfulZdq{}}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}ifndef BLAND}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KNRM  \PYGcolorfulZdq{}\PYGcolorfulZbs{}x1B[0m\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KRED  \PYGcolorfulZdq{}\PYGcolorfulZbs{}x1B[31m\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KGRN  \PYGcolorfulZdq{}\PYGcolorfulZbs{}x1B[32m\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KYEL  \PYGcolorfulZdq{}\PYGcolorfulZbs{}x1B[33m\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KBLU  \PYGcolorfulZdq{}\PYGcolorfulZbs{}x1B[34m\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KMAG  \PYGcolorfulZdq{}\PYGcolorfulZbs{}x1B[35m\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KCYN  \PYGcolorfulZdq{}\PYGcolorfulZbs{}x1B[36m\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KWHT  \PYGcolorfulZdq{}\PYGcolorfulZbs{}x1B[37m\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}else}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KNRM  \PYGcolorfulZdq{}\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KRED  \PYGcolorfulZdq{}\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KGRN  \PYGcolorfulZdq{}\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KYEL  \PYGcolorfulZdq{}\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KBLU  \PYGcolorfulZdq{}\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KMAG  \PYGcolorfulZdq{}\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KCYN  \PYGcolorfulZdq{}\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define KWHT  \PYGcolorfulZdq{}\PYGcolorfulZdq{}}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}endif}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}FREED 0}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}INT  1}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}CONS 2}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}SYM  3}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}LAMBDA  4}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}BUILTIN 5}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}BIGNUM 6}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}STR 7}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}BYTES 8}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}VEC 9}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}STRUCT\PYGcolorfulZus{}DEF 10}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}STRUCT 11}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}ERROR 512}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}LET 1024}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}ANY 2048}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}VOID 4096}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}STREAM 8192}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}FS 16384}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define TAG\PYGcolorfulZus{}MARK 65536}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define tag\PYGcolorfulZus{}t jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define MAX\PYGcolorfulZus{}EVAL\PYGcolorfulZus{}DEPTH 10000}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define SYM\PYGcolorfulZus{}INIT\PYGcolorfulZus{}BUFFER\PYGcolorfulZus{}SIZE 32}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define BIGNUM\PYGcolorfulZus{}INIT\PYGcolorfulZus{}BUFFER\PYGcolorfulZus{}SIZE 32}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define ERR\PYGcolorfulZus{}SYNTAX 0}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define ERR\PYGcolorfulZus{}MAX\PYGcolorfulZus{}EVAL\PYGcolorfulZus{}DEPTH 1}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define ERR\PYGcolorfulZus{}UNKNOWN\PYGcolorfulZus{}OP 2}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define ERR\PYGcolorfulZus{}APPLY\PYGcolorfulZus{}NIL 3}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define ERR\PYGcolorfulZus{}INVALID\PYGcolorfulZus{}PARAM\PYGcolorfulZus{}TYPE 4}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define ERR\PYGcolorfulZus{}OUT\PYGcolorfulZus{}OF\PYGcolorfulZus{}BOUNDS 5}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define ERR\PYGcolorfulZus{}OUT\PYGcolorfulZus{}OF\PYGcolorfulZus{}MEMORY 666}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define ERR\PYGcolorfulZus{}NOT\PYGcolorfulZus{}FOUND 404}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define ERR\PYGcolorfulZus{}FORBIDDEN 403}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define max(a,b) (a \PYGcolorfulZgt{} b ? a : b)}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define min(a,b) (a \PYGcolorfulZlt{} b ? a : b)}
+
+\PYGcolorful{k}{typedef} \PYGcolorful{k}{struct} \PYGcolorful{n}{Cell} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{k}{union} \PYGcolorful{n}{ar} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{n}{jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t} \PYGcolorful{n}{value}\PYGcolorful{p}{;}
+    \PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n}{addr}\PYGcolorful{p}{;}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}} \PYGcolorful{n}{ar}\PYGcolorful{p}{;}
+  \PYGcolorful{k}{union} \PYGcolorful{n}{dr} \PYGcolorful{p}{\PYGcolorfulZob{}}
+    \PYGcolorful{n}{jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t} \PYGcolorful{n}{size}\PYGcolorful{p}{;}
+    \PYGcolorful{k+kt}{void}\PYGcolorful{o}{*} \PYGcolorful{n}{next}\PYGcolorful{p}{;}
+  \PYGcolorful{p}{\PYGcolorfulZcb{}} \PYGcolorful{n}{dr}\PYGcolorful{p}{;}
+  \PYGcolorful{n}{jit\PYGcolorfulZus{}word\PYGcolorfulZus{}t} \PYGcolorful{n}{tag}\PYGcolorful{p}{;}
+\PYGcolorful{p}{\PYGcolorfulZcb{}} \PYGcolorful{n}{Cell}\PYGcolorful{p}{;}
+
+\PYGcolorful{k+kt}{int} \PYGcolorful{n+nf}{is\PYGcolorfulZus{}nil}\PYGcolorful{p}{(}\PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{c}\PYGcolorful{p}{);}
+
+\PYGcolorful{k}{typedef} \PYGcolorful{k}{struct} \PYGcolorful{n}{env\PYGcolorfulZus{}entry} \PYGcolorful{p}{\PYGcolorfulZob{}}
+  \PYGcolorful{n}{Cell}\PYGcolorful{o}{*} \PYGcolorful{n}{cell}\PYGcolorful{p}{;}
+  \PYGcolorful{k+kt}{char} \PYGcolorful{n}{name}\PYGcolorful{p}{[}\PYGcolorful{l+m+mi}{64}\PYGcolorful{p}{];}
+\PYGcolorful{p}{\PYGcolorfulZcb{}} \PYGcolorful{n}{env\PYGcolorfulZus{}entry}\PYGcolorful{p}{;}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define car(x) (x?(Cell*)((Cell*)x)\PYGcolorfulZhy{}\PYGcolorfulZgt{}ar.addr:NULL)}
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}define cdr(x) (x?(Cell*)((Cell*)x)\PYGcolorfulZhy{}\PYGcolorfulZgt{}dr.next:NULL)}
+
+\PYGcolorful{c+cp}{\PYGcolorfulZsh{}endif}
+\end{Verbatim}

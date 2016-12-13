@@ -32,14 +32,18 @@
 
 \usepackage[langlinenos=true,newfloat=true]{minted}
 \newcommand{\source}[5]{
-  \inputminted[frame=lines,linenos,style=colorful,fontfamily=tt,breaklines,autogobble,firstline=#3,firstnumber=#3,lastline=#4,label={#2[#3--#4]}]{#1}{../interim/sledge/#2}
-  \captionsetup{name=Listing,labelformat=listing,labelsep=endash,labelfont={sc}}
-  \caption{#5}
-}
+  \begin{table}[H]
+    \centering
+    \inputminted[frame=lines,linenos,style=colorful,fontfamily=tt,breaklines,autogobble,firstline=#3,firstnumber=#3,lastline=#4,label={#2[#3--#4]}]{#1}{../interim/sledge/#2}
+    \captionsetup{name=Listing,labelformat=listing,labelsep=endash,labelfont={sc}}
+    \caption{#5}
+  \end{table}
+  }
 \newcommand{\sourceC}[4]{\source{C}{#1}{#2}{#3}{#4}}
 \newcommand{\sourceLisp}[4]{\source{Lisp}{os/#1}{#2}{#3}{#4}}
 \newcommand{\codeC}[1]{\mintinline[style=colorful,fontfamily=tt]{C}{#1}}
 \newcommand{\codeLisp}[1]{\mintinline[style=colorful,fontfamily=tt]{Lisp}{#1}}
+\newcommand{\codeASM}[1]{\mintinline[style=colorful,fontfamily=tt]{nasm}{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\foreign}[1]{\emph{#1}}
 
@@ -65,9 +69,9 @@ La partie gérant la mémoire fonctionne de la manière suivante :
 \begin{itemize}
   \item On lit l'expression \foreign{Minilisp} donnée.
   \item On formate cette expression en une représentation plus structurée pour faciliter la compilation.
-  \item On produit du code assembleur correspondant à l'éxécution de l'expression donnée, que l'on stocke dans un fichier temporaire.
-  \item Le code produit utilise des fonctions spéciales d'allocations qui permettent de faire fonctionner le ramasse-miettes pour libérer la mémoire lorsque c'est nécéssaire.
-  \item On éxécute ce code assembleur.
+  \item On produit du code assembleur correspondant à l'exécution de l'expression donnée, que l'on stocke dans un fichier temporaire.
+  \item Le code produit utilise des fonctions spéciales d'allocations qui permettent de faire fonctionner le ramasse-miettes pour libérer la mémoire lorsque c'est nécessaire.
+  \item On exécute ce code assembleur.
   \item On affiche le résultat (qui est une valeur \foreign{Minilisp}).
 \end{itemize}
 
@@ -91,15 +95,15 @@ La partie gérant la mémoire fonctionne de la manière suivante :
     \hline
     \code{writer.[h|c]} & Fonctions pour écrire une valeur \foreign{Minilisp} dans un \foreign{buffer} \tabularnewline
     \hline
-    \code{stream.[h|c]} & Représentations des systèmes de fichiers, et fonctions pour les ouvrir, fermern écrire\ldots \tabularnewline
+    \code{stream.[h|c]} & Représentations des systèmes de fichiers, et fonctions pour les ouvrir, fermer, écrire\ldots \tabularnewline
     \hhline{|=|=|}
     \code{jit\_x64.c} & Fonctions pour écrire de l'assembleur \foreign{x86-64} \tabularnewline
     \hline
     \code{compiler\_new.[h|c]} & Compile une expression \foreign{Minilisp} en assembleur, et initialise l'environnement avec les primitives \foreign{Minilisp} \tabularnewline
     \hline
-    \code{compiler\_x64\_hosted.c} & Compile l'expression en assembleur \foreign{x86-64}, l'éxécute et renvoie le résultat de son éxécution \tabularnewline
+    \code{compiler\_x64\_hosted.c} & Compile l'expression en assembleur \foreign{x86-64}, l'exécute et renvoie le résultat de son exécution \tabularnewline
     \hhline{|=|=|}
-    \code{sledge.c} & Contient la fonction principale, qui ouvre un \foreign{channel} passé en argument, y lit une expression qu'il \foreign{parse} et éxécute avant d'afficher le résultat \tabularnewline
+    \code{sledge.c} & Contient la fonction principale, qui ouvre un \foreign{channel} passé en argument, y lit une expression qu'il \foreign{parse} et exécute avant d'afficher le résultat \tabularnewline
     \hline
   \end{tabularx}
   \caption{Liste des fichiers \foreign{C}}
@@ -153,13 +157,13 @@ La partie gérant la mémoire fonctionne de la manière suivante :
     \hline
     \codeLisp{(shr a b)} & Décalage logique vers la droite \tabularnewline
     \hhline{|=|=|}
-    \codeLisp{(add a b)} & Addition \tabularnewline
+    \codeLisp{(+ a b)} & Addition \tabularnewline
     \hline
-    \codeLisp{(sub a b)} & Soustraction \tabularnewline
+    \codeLisp{(- a b)} & Soustraction \tabularnewline
     \hline
-    \codeLisp{(mul a b)} & Multiplication \tabularnewline
+    \codeLisp{(* a b)} & Multiplication \tabularnewline
     \hline
-    \codeLisp{(div a b)} & Quotient de la division \tabularnewline
+    \codeLisp{(/ a b)} & Quotient de la division \tabularnewline
     \hline
     \codeLisp{(mod a b)} & Reste de la division \tabularnewline
     \hhline{|=|=|}
@@ -170,7 +174,7 @@ La partie gérant la mémoire fonctionne de la manière suivante :
     \codeLisp{(= a b)} & Test d'égalité \tabularnewline
     \hline
   \end{tabularx}
-  \caption{Liste des \foreign{builtins} arithmético-logiques \foreign{Minilisp}}
+  \caption{Liste des \foreign{builtins} \foreign{Minilisp} arithmético-logiques}
 \end{table}
 
 \begin{table}[H]
@@ -179,17 +183,17 @@ La partie gérant la mémoire fonctionne de la manière suivante :
     \hline
     Signature & Effet \tabularnewline
     \hhline{|=|=|}
-    \codeLisp{(def x v)} & Définit \codeLisp{x} comme valant \codeLisp{v} \tabularnewline
+    \codeLisp{(def x v)} & Définit globalement \codeLisp{x} comme valant \codeLisp{v} \tabularnewline
     \hline
-    \codeLisp{(let x v)} & Définit \codeLisp{x} comme valant \codeLisp{v} (allocation locale sur la pile) \tabularnewline
+    \codeLisp{(let x v)} & Définit \codeLisp{x} comme valant \codeLisp{v} (allocation locale sur la pile, qui pourra donc être \foreign{garbage-collectée}) \tabularnewline
     \hline
-    \codeLisp{(fn x1 \ldots xn r)} & Renvoie une fonction à \code{n} arguments qui renvoie \codeLisp{r}, un argument est soit un symbole soit de la forme \codeLisp{(symbol struct_def)}, et \codeLisp{symbol} sera alors de type \codeLisp{struct_def} \tabularnewline
+    \codeLisp{(fn x1 .. xn r)} & Renvoie une fonction à \code{n} arguments qui renvoie \codeLisp{r}, un argument est soit un symbole soit de la forme \codeLisp{(symb struct_def)}, et \codeLisp{symb} sera alors de type \codeLisp{struct_def} \tabularnewline
     \hhline{|=|=|}
     \codeLisp{(if b x y)} & Si \codeLisp{b} évalue à vrai, renvoie \codeLisp{x}, sinon \codeLisp{y} (qui doivent avoir le même type) \tabularnewline
     \hline
     \codeLisp{(while b e)} & Exécute \codeLisp{e} tant que \codeLisp{b} est vrai \tabularnewline
     \hline
-    \codeLisp{(do x1 \ldots xn)} & Exécute \codeLisp{x1}, \ldots, \codeLisp{xn} et renvoie \codeLisp{xn} \tabularnewline
+    \codeLisp{(do x1 .. xn)} & Exécute \codeLisp{x1}, .., \codeLisp{xn} et renvoie \codeLisp{xn} \tabularnewline
     \hhline{|=|=|}
     \codeLisp{(car l)} & Renvoie la tête de la liste \codeLisp{l} \tabularnewline
     \hline
@@ -197,18 +201,18 @@ La partie gérant la mémoire fonctionne de la manière suivante :
     \hline
     \codeLisp{(cons x l)} & Renvoie la liste \codeLisp{(x l)} \tabularnewline
     \hline
-    \codeLisp{(list x1 \ldots xn)} & Renvoie \codeLisp{(cons x1 (cons x2 (\ldots (cons xn-1 xn)\ldots)))} \tabularnewline
+    \codeLisp{(list x1 .. xn)} & Renvoie \codeLisp{(cons x1 (.. (cons xn-1 xn)..))} \tabularnewline
     \hhline{|=|=|}
-    \codeLisp{(struct s c1 x1 \ldots cn xn)} & Définit \codeLisp{s} comme une structure contenant \code{n} champs dont les noms sont \codeLisp{fi} et les valeurs par défaut \codeLisp{xi} \tabularnewline
+    \codeLisp{(struct s c1 x1 .. cn xn)} & Définit \codeLisp{s} comme une structure contenant \code{n} champs dont les noms sont \codeLisp{fi} et les valeurs par défaut \codeLisp{xi} \tabularnewline
     \hline
     \codeLisp{(new s)} & Alloue et renvoie une structure de type \codeLisp{s} \tabularnewline
     \hline
-    \codeLisp{(sget s c)} & Renvoie la valeur du champ codeLisp{c} de la structure \codeLisp{s} \tabularnewline
+    \codeLisp{(sget s c)} & Renvoie la valeur du champ \codeLisp{c} de la structure \codeLisp{s} \tabularnewline
     \hline
     \codeLisp{(sput s c v)} & Affecte la valeur \codeLisp{v} au champ \codeLisp{c} de la structure \codeLisp{s} \tabularnewline
     \hline
   \end{tabularx}
-  \caption{Liste des \foreign{builtins} de contrôle \foreign{Minilisp}}
+  \caption{Liste des \foreign{builtins} \foreign{Minilisp} de contrôle}
 \end{table}
 
 \begin{table}[H]
@@ -240,28 +244,149 @@ La partie gérant la mémoire fonctionne de la manière suivante :
     \codeLisp{(alloc_str n)} & Alloue et renvoie une chaîne de \codeLisp{n} caractères \tabularnewline
     \hline
     \codeLisp{(bytes_to_str b n)} & Alloue et renvoie une chaîne de \codeLisp{n} caractères obtenues depuis \codeLisp{b} \tabularnewline
+    \hline{|=|=|}
+    \codeLisp{(size x)} & Renvoie la taille de \codeLisp{x} en mémoire \tabularnewline
+    \hline
+    \codeLisp{(gc)} & Appelle la fonction \codeC{collect_garbage} \tabularnewline
+    \hline
+    \codeLisp{(symbols)} & Renvoie la liste des symboles connus \tabularnewline
+    \hline
+    \codeLisp{(debug)} & Devrait appeler \codeC{platform_debug} mais a été commenté \tabularnewline
     \hline
   \end{tabularx}
-  \caption{Liste des \foreign{builtins} de gestion de la mémoire\foreign{Minilisp}}
+  \caption{Liste des \foreign{builtins} \foreign{Minilisp} de gestion de la mémoire}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Signature & Effet \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(write x b)} & Écrit la représentation de \codeLisp{x} dans le \foreign{buffer} \codeLisp{b} \tabularnewline
+    \hline
+    \codeLisp{(read b)} & Lit le code \foreign{Minilisp} situé dans le \foreign{buffer} \codeLisp{b} et renvoie une valeur \foreign{Minilisp} correspondante \tabularnewline
+    \codeLisp{(eval x)} & Exécute le code situé dans \codeLisp{x} (typiquement renvoyé par \codeLisp{read}) en appelant \codeC{platform_eval} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(print s)} & Affiche la (liste de) chaîne(s) de caractères \codeLisp{s} \tabularnewline
+    \hline
+    \codeLisp{(mount p h)} & Monte le fichier à l'emplacement \codeLisp{p}, où \codeLisp{h} est une liste de fonctions permettant d'opérer sur le fichier (inutilisé) \tabularnewline
+    \hline
+    \codeLisp{(mmap p)} & Applique l'opérateur \codeLisp{mmap} du système de fichier considéré au fichier à l'emplacement \codeLisp{p} \tabularnewline
+    \hline
+    \codeLisp{(open p)} & Ouvre le fichier à l'emplacement \codeLisp{p} \tabularnewline
+    \hline
+    \codeLisp{(recv f)} & Lit le fichier \codeLisp{f} \tabularnewline
+    \hline
+    \codeLisp{(send f s)} & Écrit la (liste de) chaîne(s) de caractères \codeLisp{s} dans le fichier \codeLisp{f} \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des \foreign{builtins} \foreign{Minilisp} de gestion des fichiers}
 \end{table}
 
 
 \section{Allocation de la mémoire}
 
-\subsection{Représentation des cellules}
+\subsection{Représentation des valeurs \foreign{Minilisp}}
+
+Une valeur \foreign{Minilisp} est représentée par la \codeC{struct Cell} dont on donne la signature :\sourceC{minilisp.h}{81}{91}{Représentation des valeurs}
+
+La tête est représentée par le champ \codeC{ar} qui est soit une valeur soit un pointeur vers une autre \codeC{Cell}. La queue est représentée par le champ \codeC{dr} qui est soit une taille soit un pointeur sur la suite de la liste. Enfin, le champ \codeC{tag} indique le type de la cellule, qui peut être un entier (\codeC{TAG_INT}), une lilste (\codeC{TAG_CONS}), un symbole (\codeC{TAG_SYM}), une fonction (\codeC{TAG_LAMBDA}) \ldots\ Le \codeC{tag} détermine quels champs des unions seront effectivement utilisés.
+
+
+\subsection{Gestion de la mémoire}
+
+La gestion de la mémoire est effectuée par :
+\begin{itemize}
+  \item un tableau \codeC{cell_heap} qui contient les cellules déjà allouées (qu'elles soient libres ou occupées, l'allocation s'effectuant une fois pour toute lors de l'initialisation du tableau),
+  \item un tableau \codeC{byte_heap} qui contient les données non formatées allouées (non implémenté, dans la version courante il s'agit d'un simple \codeC{malloc} sans \foreign{garbage collection},
+  \item un tableau \codeC{free_list} qui contient les adresses des cellules libres qui ne sont pas en position terminale (au fur et à mesure de l'exécution, il y a des \og trous \fg\ dans le tableau),
+  \item deux entiers \codeC{free_list_avail} et \codeC{free_list_consumed} qui sont respectivement la taille du tableau précédent et l'indice de la première cellule non encore réutilisée dans ce même tableau.
+\end{itemize}
+
+Les tailles des différents tableaux sont totalement arbitraires : la limite est de \nombre{100 000} cellules au total, et 8 kilooctets de mémoire pour le \codeC{byte_heap}.
+
+L'allocation d'une cellule se fait de deux manières différentes : soit une cellule libérée par une précédente itération du \foreign{garbage collector}, et en ce cas on utilise celle-ci, soit il n'y en a pas et on cherche à la position courante du \codeC{cell_heap} si il reste des cellules non utilisées.
+
 
 \subsection{\foreign{Garbage collection}}
+
+On dispose d'une fonction \codeC{mark_tree} qui parcourt récursivement une cellule (et les cellules vers lesquelles elle pointe) pour les marquer (complexité linéaire en la taille de l'arbre, puisqu'on s'arrête lorsqu'on tombe sur une cellule déjà marquée : ainsi, chaque nœud est visité au plus une fois).
+
+Cette fonction est appelée par \codeC{collect_garbage} sur toute l'étendue de la pile (du haut (\codeC{stack_end}) vers le bas (\codeC{stack_pointer})). La complexité est encore une fois linéaire en la taille de la mémoire pour la même raison que précédemment.
+
+On va ainsi marquer toutes les cellules atteignables depuis la pile, un système de fichier ouvert ou l'environnement global. On passe alors à la phase de balayage : on parcourt le tas et toute cellule non marquée est donc désignée comme libre.
+
+L'auteur a un problème avec les fonctions (\codeC{TAG_LAMBDA}) puisque rien ne pointe vers une clôture anonyme. Il propose pour pallier ce problème de rajouter un pointeur vers les fonctions appelées par une fonction, afin de détecter lorsqu'une fonction ne sera plus jamais appelée de manière certaine.
 
 
 \section{Compilation à la volée}
 
-\subsection{Schéma général et choix effectués}
+\subsection{Fonctions auxiliaires}
 
-\subsection{Améliorations apportées}
+Parmi les fonctions auxiliaires disponibles, voici les principales :
+\begin{itemize}
+  \item \codeC{lookup_global_symbol} qui cherche dans l'environnement global l'\codeC{env_entry} correspondant au symbole cherché,
+  \item \codeC{insert_symbol} et \codeC{insert_global_symbol} qui modifient l'environnement pour rajouter une définition d'un symbole,
+  \item \codeC{load_int} et \codeC{load_cell} produisent du code assembleur pour charger une valeur dans un registre particulier (depuis un autre registre, la pile, le tas, \ldots),
+  \item \codeC{push_frame_regs} et \codeC{pop_frame_regs} qui empilent et dépilent certains registres sur la pile (utile pour les appels de fonction, dont le nombre d'arguments passés par registre est fixé à 4),
+  \item \codeC{analyze_fn} compte le nombre d'atomes différents dans le corps de la fonction fournie (afin de prévoir la taille de la clôture (\codeC{Frame}) qui va être associée à cette fonction),
+  \item \codeC{init_compiler} rajoute tous les \foreign{builtins} dans l'environnement global.
+\end{itemize}
+
+\subsection{La fonction \codeC{compile_expr}}
+
+Le code s'appuie beaucoup sur le fait que les fonctions écrites en \foreign{C} sont accessibles depuis du code assembleur écrit pendant l'exécution du programme, ce qui permet d'utiliser notamment les fonctions d'allocations directement afin de pouvoir faire appel au \foreign{garbage collector} non seulement pour le code statique mais aussi pour du code écrit dans le \foreign{REPL} par exemple.
+
+On effectue de petites vérifications : par exemple, que les symboles sont bien définis lorsqu'ils sont rencontrés (ou bien dans l'environnement global, ou bien dans la clôture de la fonction). On vérifie également que lorsqu'on a un \codeC{TAG_CONS}, la tête est bien une fonction dont la signature concorde avec les arguments fournis. On vérifie également que dans une condition les deux branches renvoient le même type. On effectue également du typage dynamique lors de l'utilisation d'une fonction comme \codeLisp{get8} afin de vérifier que l'on manipule bien une chaîne de caractères ou des \foreign{bytes}.
+
+On adopte une stratégie d'\foreign{eager evaluation} pour les appels de fonction : tous les arguments sont d'abord évalués, passés par registres (maximum 4) puis sur la pile et enfin la fonction est appelée. Cependant, il s'agit de bien appliquer une stratégie de \foreign{lazy evaluation} pour les définitions de fonctions (on ne souhaite pas que le code soit exécuté lors de la définition de la fonction).
+
+Les fonctions \foreign{builtins} faisant appel à des fonctions définies dans du code \foreign{C} (par exemple \codeLisp{eval}) sont entourées d'une sauvegarde du pointeur de pile sur le sommet de la pile, ce qui permet de simuler des appels à \codeASM{call} et \codeASM{ret}, bien que l'on ne voie pas en quoi c'est nécessaire.
 
 
-\section{Affichage des fenêtres}
+\section{Améliorations apportées}
 
+\subsection{Optimisation du \foreign{garbage collecting}}
+
+Les appels aux \foreign{GC} sont coûteux car il faut alors explorer toutes les références pour savoir si une \codeC{Cell} est encore utilisée ou non. Ils sont cependant nécessaires car le programme risque de tomber à court de mémoire. Dans \code{shell.l}, on remarque qu'après l'exécution et le dessin de chaque \foreign{frame}, le \foreign{GC} est appelé. Parfois, la mémoire est encore loin d'être pleine et il n'est alors pas nécessaire de faire cet appel. Nous l'avons ainsi remplacé par une nouvelle fonction native (\foreign{builtin}) \codeLisp{gc-if-needed} qui appelle le \foreign{GC} seulement si la mémoire est trop remplie. De cette manière, il n'y a pas de problème de mémoire et on mesure, lorsque le système est inactif un gain de performances de 50\%. Malheureusement, en activité, les gains sont bien moins importants car la mémoire est utilisée intensivement et se remplit vite.
+
+On a obtenu les résultats suivants :
+\begin{description}
+  \item [\foreign{GC} systématique :] 60 images en 90 unités de temps
+  \item [\foreign{GC} si nécessaire :] 60 images en 60 unités de temps
+\end{description}
+
+Implémentation :
+\sourceC{alloc.c}{186}{191}{Appel du \foreign{GC} si nécessaire}
+\begin{table}[H]
+  \centering
+  \inputminted[frame=lines,linenos,style=colorful,fontfamily=tt,breaklines,autogobble,firstline=1638,firstnumber=1638,lastline=1646,label={compiler\_new[1638--1646]}]{C}{../interim/sledge/compiler_new.c}
+  \captionsetup{name=Listing,labelformat=listing,labelsep=endash,labelfont={sc}}
+  \caption{Ajout de la primitive}
+\end{table}
+\sourceLisp{shell.l}{264}{264}{Appel de la fonction}
+
+ 
+\subsection{Système de tâches}
+ 
+Le système de tâches utilisé par \foreign{Interim OS} a l'avantage de pouvoir gérer plusieurs fenêtres à la fois. Cependant, on remarque en pratique qu'il est pourvu de nombreux dysfonctionnements : les \code{segfaults} sont légion (ils peuvent se produire lors du redimensionnement d'une fenêtre par exemple\ldots), le recouvrement des fenêtres n'est pas bien géré, et enfin celles-ci ne se redessinent pas toujours automatiquement (notamment le logo qui peut être effacé en glissant l'éditeur par-dessus puis en le remettant à sa place initiale).
+
+On a alors effectué les ajouts suivants :
+\begin{itemize}
+  \item \codeLisp{desktop-task} pour afficher correctement le logo au fond et du texte,
+  \item \codeLisp{force-draw} qui donne un rendu correct (en provoquant le dessin des fenêtres inactives qui ont put être recouvertes) mais qui est très lent.
+\end{itemize}
+\sourceLisp{shell.l}{227}{234}{Ajout de la tâche de bureau}
+
+
+\subsection{Analyse de la lenteur du rendu}
+
+Il se trouve que le rendu des fenêtres d'\foreign{Interim OS} est très lent. En effet une simple remise à blanc de l'écran par \foreign{frame} impacte drastiquement les performances en ralentissant l'exécution de l'ordre de 5 fois. Ceci n'est pas étonnant car toutes les opérations se font pixel par pixel. 
+
+D'une part, ce genre de travail sur des pixels n'est pas adapté pour un \foreign{CPU} et devrait être exécuté par un \foreign{GPU}. D'autre part, il est normalement possible de faire de telles opérations simples et de s'en tirer avec une vitesse d'affichage correcte même sans accélération \foreign{GPU}, mais ici pour chaque pixel, il y a un certain coût fixe lié à l'interfaçage entre \foreign{Minilisp} et le \codeC{Filesystem} représentant l'écran puis le programme \foreign{C}. 
+
+Ainsi pour résoudre ce problème, il faudrait ajouter des primitives pour remplir directement une zone entière d'une certaine couleur. Si on assimile l'écran à un carré de pixels de coté $n$ ,alors on divise ainsi le coût fixe par un facteur proportionnel à $n^2$ puisqu'on ne le paye désormais qu'une seule fois par rectangle au lieu d'une fois par pixel.
 
 
 \end{document}
