@@ -49,9 +49,9 @@ On vérifie qu'on a la bonne signature (i.e. bons nombre et types d'arguments) a
   - BUILTIN_SGET : choppe la valeur du champ d'une STRUCT
   - BUILTIN_SPUT : modifie la valeur du champ d'une STRUCT
 
-  - BUILTIN_QUOTE : load l'addresse du premier argument ?
+  - BUILTIN_QUOTE : load l'adresse du premier argument ?
   - BUILTIN_CAR : choppe la tête de la paire (arithmétique de pointeur)
-  - BUILTIN_CDR : choppe la queue (#yoan) de la paire (arithmétique de pointuer)
+  - BUILTIN_CDR : choppe la queue (#yoan) de la paire (arithmétique de pointeur)
   - BUILTIN_CONS : juste alloc_cons avec ce qu'on pense
   - BUILTIN_CONCAT : alloc_concat avec ce qu'on pense
   - BUILTIN_SUSBTR : alloc_substr (sub-string)
@@ -79,7 +79,7 @@ On vérifie qu'on a la bonne signature (i.e. bons nombre et types d'arguments) a
 
   Encore des fonctions entre des jit_host
   - BUILTIN_PRINT : lisp_print
-  - BUILTIN_MOUNT : fs_mount
+  - BUILTIN_MOUNT : fs_mount (déclare un fichier avec les fonctions d'open, de read, write...)
   - BUILTIN_MMAP : fs_mmap
   - BUILTIN_OPEN : fs_open
   - BUILTIN_RECV : stream_read

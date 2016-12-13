@@ -1,0 +1,267 @@
+\documentclass[a4paper, 10pt, french]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[frenchb]{babel}
+\usepackage{lmodern}
+\usepackage[autolanguage]{numprint}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{tabularx} \newcolumntype{C}{>{\centering}X}
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{collcell}
+\usepackage{subcaption}
+
+\usepackage[margin=3cm]{geometry}
+\usepackage{multicol}
+\usepackage[10pt]{moresize}
+\usepackage{pdflscape}
+
+
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{amsopn}
+\usepackage{stmaryrd}
+
+\DeclareCaptionLabelFormat{listing}{Listing #2}
+\DeclareCaptionSubType*[arabic]{table}
+\captionsetup[subtable]{labelformat=simple}
+
+\usepackage[langlinenos=true,newfloat=true]{minted}
+\newcommand{\source}[5]{
+  \inputminted[frame=lines,linenos,style=colorful,fontfamily=tt,breaklines,autogobble,firstline=#3,firstnumber=#3,lastline=#4,label={#2[#3--#4]}]{#1}{../interim/sledge/#2}
+  \captionsetup{name=Listing,labelformat=listing,labelsep=endash,labelfont={sc}}
+  \caption{#5}
+}
+\newcommand{\sourceC}[4]{\source{C}{#1}{#2}{#3}{#4}}
+\newcommand{\sourceLisp}[4]{\source{Lisp}{os/#1}{#2}{#3}{#4}}
+\newcommand{\codeC}[1]{\mintinline[style=colorful,fontfamily=tt]{C}{#1}}
+\newcommand{\codeLisp}[1]{\mintinline[style=colorful,fontfamily=tt]{Lisp}{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\foreign}[1]{\emph{#1}}
+
+
+
+\title{Rapport \foreign{Interim OS}}
+\author{Marc \bsc{Ducret} \and Florentin \bsc{Guth}}
+
+\begin{document}
+
+\maketitle
+\vfill
+\tableofcontents
+\vfill
+\clearpage
+\section{Structure de l'\foreign{OS}}
+
+\subsection{Architecture générale}
+
+\foreign{Interim OS} est scindé en deux parties : un partie permettant de gérer précisément la mémoire, écrite en \foreign{C}, et une partie contenant la gestion des différents programmes (comme un éditeur, une console, \ldots).
+
+La partie gérant la mémoire fonctionne de la manière suivante :
+\begin{itemize}
+  \item On lit l'expression \foreign{Minilisp} donnée.
+  \item On formate cette expression en une représentation plus structurée pour faciliter la compilation.
+  \item On produit du code assembleur correspondant à l'éxécution de l'expression donnée, que l'on stocke dans un fichier temporaire.
+  \item Le code produit utilise des fonctions spéciales d'allocations qui permettent de faire fonctionner le ramasse-miettes pour libérer la mémoire lorsque c'est nécéssaire.
+  \item On éxécute ce code assembleur.
+  \item On affiche le résultat (qui est une valeur \foreign{Minilisp}).
+\end{itemize}
+
+\subsection{Liste des fichiers \foreign{C}}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Nom du fichier & Contenu \tabularnewline
+    \hhline{|=|=|}
+    \code{strmap.[h|c]} & Opérations sur une table de hachage dont les clés sont des chaînes de caractères \tabularnewline
+    \hhline{|=|=|}
+    \code{minilisp.h} & Contient la représentation mémoire des valeurs du \foreign{Minilisp} \tabularnewline
+    \hhline{|=|=|}
+    \code{alloc.[h|c]} & Définition de l'environnement, des différents tas, du \foreign{garbage collector} et des fonctions d'allocations des différents types de cellules \tabularnewline
+    \hhline{|=|=|}
+    \code{utf8.[h|c]} & Conversion entre chaînes de caractères standard et l'encodage \foreign{UTF-8} \tabularnewline
+    \hline
+    \code{reader.[h|c]} & \foreign{Parser} de \foreign{minilisp} \tabularnewline
+    \hline
+    \code{writer.[h|c]} & Fonctions pour écrire une valeur \foreign{Minilisp} dans un \foreign{buffer} \tabularnewline
+    \hline
+    \code{stream.[h|c]} & Représentations des systèmes de fichiers, et fonctions pour les ouvrir, fermern écrire\ldots \tabularnewline
+    \hhline{|=|=|}
+    \code{jit\_x64.c} & Fonctions pour écrire de l'assembleur \foreign{x86-64} \tabularnewline
+    \hline
+    \code{compiler\_new.[h|c]} & Compile une expression \foreign{Minilisp} en assembleur, et initialise l'environnement avec les primitives \foreign{Minilisp} \tabularnewline
+    \hline
+    \code{compiler\_x64\_hosted.c} & Compile l'expression en assembleur \foreign{x86-64}, l'éxécute et renvoie le résultat de son éxécution \tabularnewline
+    \hhline{|=|=|}
+    \code{sledge.c} & Contient la fonction principale, qui ouvre un \foreign{channel} passé en argument, y lit une expression qu'il \foreign{parse} et éxécute avant d'afficher le résultat \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des fichiers \foreign{C}}
+\end{table}
+
+\subsection{Liste des fichiers \foreign{Minilisp}}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Nom du fichier & Contenu \tabularnewline
+    \hhline{|=|=|}
+    \code{lib.l} & Fonctions de base sur les listes et les chaînes de caractères \tabularnewline
+    \hline
+    \code{gfx.l} & Fonctions de base d'affichage de figures géométriques \tabularnewline
+    \hhline{|=|=|}
+    \code{mouse.l} & Gestion de la souris comme système de fichiers \tabularnewline
+    \hline
+    \code{net.l} & Communication sur internet (notamment par \foreign{IRC}) par un système de fichiers \tabularnewline
+    \hhline{|=|=|}
+    \code{editor.l} & Fonctionnement de l'éditeur : affichage, gestion des touches pressées, \ldots \tabularnewline
+    \hline
+    \code{repl.l} & Fonctionnement du \foreign{REPL (read-eval-print-loop)} : affichage, gestion de l'historique des commandes, \ldots \tabularnewline
+    \hline
+    \code{paint.l} & Application de dessin ? \tabularnewline
+    \hhline{|=|=|}
+    \code{shell.l} & Gestion des différentes tâches, ajout du logo, d'un éditeur et d'un \foreign{REPL} \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des fichiers \foreign{Minilisp}}
+\end{table}
+
+\subsection{Liste des \foreign{builtins} \foreign{Minilisp}}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Signature & Effet \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(bitand a b)} & Et bit-à-bit \tabularnewline
+    \hline
+    \codeLisp{(bitnot a b)} & Non bit-à-bit \tabularnewline
+    \hline
+    \codeLisp{(bitor a b)} & Ou inclusif bit-à-bit \tabularnewline
+    \hline
+    \codeLisp{(bitxor a b)} & Ou exclusif bit-à-bit \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(shl a b)} & Décalage logique vers la gauche \tabularnewline
+    \hline
+    \codeLisp{(shr a b)} & Décalage logique vers la droite \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(add a b)} & Addition \tabularnewline
+    \hline
+    \codeLisp{(sub a b)} & Soustraction \tabularnewline
+    \hline
+    \codeLisp{(mul a b)} & Multiplication \tabularnewline
+    \hline
+    \codeLisp{(div a b)} & Quotient de la division \tabularnewline
+    \hline
+    \codeLisp{(mod a b)} & Reste de la division \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(gt a b)} & Test de supériorité \tabularnewline
+    \hline
+    \codeLisp{(lt a b)} & Test d'infériorité \tabularnewline
+    \hline
+    \codeLisp{(= a b)} & Test d'égalité \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des \foreign{builtins} arithmético-logiques \foreign{Minilisp}}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Signature & Effet \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(def x v)} & Définit \codeLisp{x} comme valant \codeLisp{v} \tabularnewline
+    \hline
+    \codeLisp{(let x v)} & Définit \codeLisp{x} comme valant \codeLisp{v} (allocation locale sur la pile) \tabularnewline
+    \hline
+    \codeLisp{(fn x1 \ldots xn r)} & Renvoie une fonction à \code{n} arguments qui renvoie \codeLisp{r}, un argument est soit un symbole soit de la forme \codeLisp{(symbol struct_def)}, et \codeLisp{symbol} sera alors de type \codeLisp{struct_def} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(if b x y)} & Si \codeLisp{b} évalue à vrai, renvoie \codeLisp{x}, sinon \codeLisp{y} (qui doivent avoir le même type) \tabularnewline
+    \hline
+    \codeLisp{(while b e)} & Exécute \codeLisp{e} tant que \codeLisp{b} est vrai \tabularnewline
+    \hline
+    \codeLisp{(do x1 \ldots xn)} & Exécute \codeLisp{x1}, \ldots, \codeLisp{xn} et renvoie \codeLisp{xn} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(car l)} & Renvoie la tête de la liste \codeLisp{l} \tabularnewline
+    \hline
+    \codeLisp{(cdr l)} & Renvoie la queue de la liste \codeLisp{l} \tabularnewline
+    \hline
+    \codeLisp{(cons x l)} & Renvoie la liste \codeLisp{(x l)} \tabularnewline
+    \hline
+    \codeLisp{(list x1 \ldots xn)} & Renvoie \codeLisp{(cons x1 (cons x2 (\ldots (cons xn-1 xn)\ldots)))} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(struct s c1 x1 \ldots cn xn)} & Définit \codeLisp{s} comme une structure contenant \code{n} champs dont les noms sont \codeLisp{fi} et les valeurs par défaut \codeLisp{xi} \tabularnewline
+    \hline
+    \codeLisp{(new s)} & Alloue et renvoie une structure de type \codeLisp{s} \tabularnewline
+    \hline
+    \codeLisp{(sget s c)} & Renvoie la valeur du champ codeLisp{c} de la structure \codeLisp{s} \tabularnewline
+    \hline
+    \codeLisp{(sput s c v)} & Affecte la valeur \codeLisp{v} au champ \codeLisp{c} de la structure \codeLisp{s} \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des \foreign{builtins} de contrôle \foreign{Minilisp}}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Signature & Effet \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(quote x)} & Renvoie l'adresse du symbole \codeLisp{x} \tabularnewline
+    \hline
+    \codeLisp{(concat s t)} & Renvoie la concaténation des chaînes \codeLisp{s} et \codeLisp{t} \tabularnewline
+    \hline
+    \codeLisp{(substr s a b)} & Renvoie une copie de la chaîne \codeLisp{s} entre \codeLisp{a} et \codeLisp{b} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(get8 s i)} & Renvoie l'octet de la chaîne \codeLisp{s} situé en position \codeLisp{i} \tabularnewline
+    \hline
+    \codeLisp{(get16 s i)} & Renvoie deux octets de la chaîne \codeLisp{s} à partir de \codeLisp{i} \tabularnewline
+    \hline
+    \codeLisp{(get32 s i)} & Renvoie quatre octets de la chaîne \codeLisp{s} à partir \codeLisp{i} \tabularnewline
+    \hline
+    \codeLisp{(put8 s i v)} & Modifie l'octet de la chaîne \codeLisp{s} situé en position \codeLisp{i} \tabularnewline
+    \hline
+    \codeLisp{(put16 s i v)} & Modifie deux octets de la chaîne \codeLisp{s} à partir de \codeLisp{i} \tabularnewline
+    \hline
+    \codeLisp{(put32 s i v)} & Modifie quatre octets de la chaîne \codeLisp{s} à partir \codeLisp{i} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(alloc n)} & Alloue et renvoie \codeLisp{n} octets \tabularnewline
+    \hline
+    \codeLisp{(alloc_str n)} & Alloue et renvoie une chaîne de \codeLisp{n} caractères \tabularnewline
+    \hline
+    \codeLisp{(bytes_to_str b n)} & Alloue et renvoie une chaîne de \codeLisp{n} caractères obtenues depuis \codeLisp{b} \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des \foreign{builtins} de gestion de la mémoire\foreign{Minilisp}}
+\end{table}
+
+
+\section{Allocation de la mémoire}
+
+\subsection{Représentation des cellules}
+
+\subsection{\foreign{Garbage collection}}
+
+
+\section{Compilation à la volée}
+
+\subsection{Schéma général et choix effectués}
+
+\subsection{Améliorations apportées}
+
+
+\section{Affichage des fenêtres}
+
+
+
+\end{document}

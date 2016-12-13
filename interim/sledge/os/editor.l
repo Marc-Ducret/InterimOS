@@ -62,8 +62,8 @@
   ; number of lines changed? then rerender
   (if (or scroll-dirty (not (eq (sget this last-num-lines) (list-size lines)))) (do
       (let render-all 1)
-      ;(print "editor boxfill") @ no more console spam
-      (boxfill surf 0 0 maxx maxy 0x59d0) ; @ 0xffff -> 0x59d0 (jolie couleur)
+      (print "editor boxfill")
+      (boxfill surf 0 0 maxx maxy 0xffff)
       (sput this scroll-dirty 0)
     )
   0)

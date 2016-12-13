@@ -10,6 +10,8 @@ union nom { members } var définit une variable var de type nom, qui est un l'un
 
 minilisp.h :
 
+LET : GC, DEF : pas GC (global)
+
 Un jit_word_t est un entier non signé sur 64 bits. Un tag_t aussi.
 
 Le type Cell a l'air d'être un genre de liste chaînée, probablement pour représenter les listes du Lisp, avec un champ value dont on ne comprend pas bien l'utilité (peut-être que c'est pour représenter les atomes de la liste). On a donc :
