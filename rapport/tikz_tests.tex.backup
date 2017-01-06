@@ -1,0 +1,74 @@
+\documentclass[a4paper, 10pt, french]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[frenchb]{babel}
+\usepackage{lmodern}
+\usepackage[autolanguage]{numprint}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{tabularx} \newcolumntype{C}{>{\centering}X}
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{collcell}
+\usepackage{subcaption}
+
+\usepackage[margin=3cm]{geometry}
+\usepackage{multicol}
+\usepackage[10pt]{moresize}
+\usepackage{pdflscape}
+
+
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{amsopn}
+\usepackage{stmaryrd}
+
+\DeclareCaptionLabelFormat{listing}{Listing #2}
+\DeclareCaptionSubType*[arabic]{table}
+\captionsetup[subtable]{labelformat=simple}
+
+\usepackage[langlinenos=true,newfloat=true]{minted}
+\newcommand{\source}[5]{
+  \begin{table}[H]
+    \centering
+    \inputminted[frame=lines,linenos,style=colorful,fontfamily=tt,breaklines,autogobble,firstline=#3,firstnumber=#3,lastline=#4,label={#2[#3--#4]}]{#1}{../interim/sledge/#2}
+    \captionsetup{name=Listing,labelformat=listing,labelsep=endash,labelfont={sc}}
+    \caption{#5}
+  \end{table}
+  }
+\newcommand{\sourceC}[4]{\source{C}{#1}{#2}{#3}{#4}}
+\newcommand{\sourceLisp}[4]{\source{Lisp}{os/#1}{#2}{#3}{#4}}
+\newcommand{\codeC}[1]{\mintinline[style=colorful,fontfamily=tt]{C}{#1}}
+\newcommand{\codeLisp}[1]{\mintinline[style=colorful,fontfamily=tt]{Lisp}{#1}}
+\newcommand{\codeASM}[1]{\mintinline[style=colorful,fontfamily=tt]{nasm}{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\foreign}[1]{\emph{#1}}
+
+
+
+\usepackage{tikz}
+\usetikzlibrary{babel,shapes,patterns}
+
+\begin{document}
+
+\begin{tikzpicture}[arrow/.style={->, ultra thick}]
+
+ \foreach \z in {0, 4} {
+  \foreach \y in {0, ..., 8} \draw (\z,     \y) -- +(3, 0);
+  \foreach \x in {0, 3}      \draw (\z + \x, 0) -- +(0, 8);
+ };
+ 
+ \draw [arrow] (-1, 5.5) node[left]  {\codeC{cells_used}}         -- (0, 5.5);
+ \draw [->, ultra thick] (8,  0.5) node[right] {\codeC{free_list_consumed}} -- (7, 0.5);
+ \draw [->, ultra thick] (8,  2.5) node[right] {\codeC{free_list_avail}}    -- (7, 2.5);
+ 
+ \foreach \y in {1, 3, 4} {
+  \fill [pattern = north east lines] (0, \y) rectangle (3, \y + 1);
+ };
+
+\end{tikzpicture}
+
+\end{document}

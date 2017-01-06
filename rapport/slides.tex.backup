@@ -1,0 +1,202 @@
+\documentclass[c, 11pt, handout, xcolor=table]{beamer}
+\setbeamertemplate{caption}{\raggedright\insertcaption\par}
+
+\usepackage{default}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[frenchb]{babel}
+\usepackage{lmodern}
+\usepackage[autolanguage]{numprint}
+% \usepackage{enumitem}
+\usepackage{array}
+\usepackage{tabularx} \newcolumntype{C}{>{\centering}X}
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{collcell}
+\usepackage{subcaption}
+
+
+
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{amsopn}
+\usepackage{stmaryrd}
+
+
+\usepackage{tikz}
+\usetikzlibrary{babel,shapes,patterns}
+
+
+\DeclareCaptionLabelFormat{listing}{Listing #2}
+\DeclareCaptionSubType*[arabic]{table}
+
+\usepackage[langlinenos=true,newfloat=true]{minted}
+\newcommand{\source}[5]{
+  \begin{table}[H]
+    \centering
+    \inputminted[frame=lines,linenos,style=colorful,fontfamily=tt,breaklines,autogobble,firstline=#3,firstnumber=#3,lastline=#4,label={#2[#3--#4]}]{#1}{../interim/sledge/#2}
+    \captionsetup{name=Listing,labelformat=listing,labelsep=endash}
+    \caption{#5}
+  \end{table}
+  }
+\newcommand{\sourceC}[4]{\source{C}{#1}{#2}{#3}{#4}}
+\newcommand{\sourceLisp}[4]{\source{Lisp}{os/#1}{#2}{#3}{#4}}
+\newcommand{\codeC}[1]{\mintinline[style=colorful,fontfamily=tt]{C}{#1}}
+\newcommand{\codeLisp}[1]{\mintinline[style=colorful,fontfamily=tt]{Lisp}{#1}}
+\newcommand{\codeASM}[1]{\mintinline[style=colorful,fontfamily=tt]{nasm}{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\foreign}[1]{\emph{#1}}
+
+
+\usetheme{Warsaw}
+
+
+\title{Projet avancé : étude d'\foreign{Interim OS}}
+\author{Marc Ducret \and Florentin Guth}
+\date{9 janvier 2017}
+
+% \theoremstyle{definition}
+% \newtheorem{definition}{Définition}[section]
+
+
+
+
+\makeatletter
+    \newenvironment{withoutheadline}{
+        \setbeamertemplate{headline}[default]
+        \def\beamer@entrycode{\vspace*{-\headheight}}
+    }{}
+\makeatother
+
+\setcounter{tocdepth}{1} % Enlève les subsections de la table des matières
+
+\begin{document}
+
+\begin{withoutheadline}
+ \begin{frame}
+  \titlepage
+  \tableofcontents
+ \end{frame}
+\end{withoutheadline}
+
+\section{Structure du système d'exploitation}
+
+\subsection{Architecture générale}
+
+\begin{frame}
+ \frametitle{Différents niveaux}
+ 
+ \begin{block}{2 couches}
+  \foreign{Interim OS} est scindé en deux parties : un partie permettant de gérer précisément la mémoire, écrite en \foreign{C}, et une partie contenant la gestion des différents programmes (comme un éditeur, une console, \ldots).
+ \end{block}
+\end{frame}
+
+
+\subsection{Section écrite en C}
+
+\begin{frame}
+ \frametitle{Fonctionnement général}
+ 
+ La partie gérant la mémoire fonctionne de la manière suivante :
+ \begin{itemize}
+  \item On lit l'expression \foreign{Minilisp} donnée,
+  \item On formate cette expression en une représentation plus structurée pour faciliter la compilation,
+  \item On produit du code assembleur correspondant à l'exécution de l'expression donnée, que l'on stocke dans un fichier temporaire,
+  \item Le code produit utilise des fonctions spéciales d'allocations qui permettent de faire fonctionner le ramasse-miettes pour libérer la mémoire lorsque c'est nécessaire,
+  \item On exécute ce code assembleur,
+  \item On affiche le résultat (qui est une valeur \foreign{Minilisp}).
+ \end{itemize}
+\end{frame}
+
+\subsection{Section écrite en Minilisp}
+
+\begin{frame}
+ \frametitle{TODO}
+ Si tu pouvais me rédiger (au moins un brouillon) cette partie, ce serait pas mal parce que je pense que tu connais mieux que moi.
+\end{frame}
+
+
+\section{Gestion de la mémoire}
+
+\subsection{Représentation des valeurs Minilisp}
+
+\begin{frame}
+ \frametitle{Structure de données}
+ \sourceC{minilisp.h}{81}{91}{La \codeC{struct Cell}}
+\end{frame}
+
+\begin{frame}
+ \frametitle{Avantages}
+ Cette représentation a plusieurs avantages :
+ \begin{itemize}
+  \item Elle permet d'effectuer facilement (en théorie \ldots) la \foreign{garbage collection}, car en fonction du \codeC{tag} on sait si on a affaire à des entiers ou des pointeurs,
+  \item Toute les valeurs ont la même taille (sans compter les cellules pointées par l'un des membres), et il n'y a pas de tableau, ce qui simplifie la gestion des blocs en mémoire.
+ \end{itemize}
+\end{frame}
+
+
+\subsection{Allocation de la mémoire}
+
+\begin{frame}[fragile]
+ \frametitle{Schéma de la mémoire}
+ 
+ \begin{tikzpicture}[arrow/.style={->, ultra thick, rounded corners, line cap=round},
+                     pointer/.style={circle, draw, fill = black, inner sep = 0.5mm},
+                     scale=0.5]
+  \foreach \z in {0, 4} {
+   \foreach \y in {0, ..., 8} \draw (\z,     \y) -- +(3, 0);
+   \foreach \x in {0, 3}      \draw (\z + \x, 0) -- +(0, 8);
+  };
+  
+  \draw [arrow] (-1.5, 5.5) node[left]  {\codeC{cells_used}}         -- (0, 5.5);
+  \draw [arrow] (8.5,  0.5) node[right] {\codeC{free_list_consumed}} -- (7, 0.5);
+  \draw [arrow] (8.5,  2.5) node[right] {\codeC{free_list_avail}}    -- (7, 2.5);
+  
+  \draw [arrow] (5.5, 0.5) node[pointer] {} -- (3, 0.5);
+  \draw [arrow] (5.5, 1.5) node[pointer] {} -- (3.5, 1.5) -- (3.5, 2.5) -- (3, 2.5);
+  
+  \foreach \y in {1, 3, 4} {
+   \fill [pattern = north east lines] (0, \y) rectangle (3, \y + 1);
+  };
+ \end{tikzpicture}
+\end{frame}
+
+
+
+\subsection{Le Garbage Collector}
+
+\begin{frame}
+ \frametitle{GC}
+\end{frame}
+
+
+
+\section{Compilation à la volée}
+
+\begin{frame}
+ \frametitle{TODO}
+\end{frame}
+
+\section{Améliorations apportées}
+
+\begin{frame}
+ \frametitle{TODO}
+\end{frame}
+
+
+
+
+
+
+\appendix
+
+\section{Annexe}
+\subsection{Remplissage}
+\begin{frame}
+ \frametitle{Truc}
+\end{frame}
+ 
+\end{document}

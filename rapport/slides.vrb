@@ -1,0 +1,21 @@
+\frametitle{Schéma de la mémoire}
+
+ \begin{tikzpicture}[arrow/.style={->, ultra thick, rounded corners, line cap=round},
+                     pointer/.style={circle, draw, fill = black, inner sep = 0.5mm},
+                     scale=0.5]
+  \foreach \z in {0, 4} {
+   \foreach \y in {0, ..., 8} \draw (\z,     \y) -- +(3, 0);
+   \foreach \x in {0, 3}      \draw (\z + \x, 0) -- +(0, 8);
+  };
+
+  \draw [arrow] (-1.5, 5.5) node[left]  {\codeC{cells_used}}         -- (0, 5.5);
+  \draw [arrow] (8.5,  0.5) node[right] {\codeC{free_list_consumed}} -- (7, 0.5);
+  \draw [arrow] (8.5,  2.5) node[right] {\codeC{free_list_avail}}    -- (7, 2.5);
+
+  \draw [arrow] (5.5, 0.5) node[pointer] {} -- (3, 0.5);
+  \draw [arrow] (5.5, 1.5) node[pointer] {} -- (3.5, 1.5) -- (3.5, 2.5) -- (3, 2.5);
+
+  \foreach \y in {1, 3, 4} {
+   \fill [pattern = north east lines] (0, \y) rectangle (3, \y + 1);
+  };
+ \end{tikzpicture}
