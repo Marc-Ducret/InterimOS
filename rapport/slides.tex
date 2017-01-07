@@ -8,7 +8,7 @@
 \usepackage[frenchb]{babel}
 \usepackage{lmodern}
 \usepackage[autolanguage]{numprint}
-% \usepackage{enumitem}
+% \usepackage{enumitem}  % Si rajouté, fais bugger les puces des listes
 \usepackage{array}
 \usepackage{tabularx} \newcolumntype{C}{>{\centering}X}
 \usepackage{multirow}
@@ -114,9 +114,21 @@
 \subsection{Section écrite en Minilisp}
 
 \begin{frame}
- \frametitle{TODO}
- Si tu pouvais me rédiger (au moins un brouillon) cette partie, ce serait pas mal parce que je pense que tu connais mieux que moi.
+ \frametitle{Fonctions présentes}
+ 
+ On a accès à toutes les primitives \foreign{C} qui permettent par exemple de changer la couleur d'un pixel de l'écran, de lancer le \foreign{garbage collector}\ldots
+ 
+ Les entrées/sorties du point de vue de l'OS sont toutes représentées par des \codeC{Filesystems} (souris, clavier, réseau, disque dur, écran). Ceci permet une certaine abstraction pour la gestion de ceux-ci (par exemple : \codeLisp{(load "/framebuffer/width")}).
 \end{frame}
+
+\begin{frame}
+ \frametitle{Gestion des fenêtres}
+ 
+ Le fichier \code{shell.l} se charge de gérer les fenêtres : il maintient une liste de tâches, chacune représentant une fenêtre.
+ 
+ Il y a une tentative de ne pas tout dessiner à chaque cycle pour ne recalculer uniquement les pixels qui sont modifiés. Le résultat est cependant décevant : souvent certains pixels ne sont pas mis à jour mais devraient l'être. Ainsi, lorsque l'on déplace une fenêtre, l'\foreign{OS} ne recalcule que la fenêtre déplacée alors qu'il faudrait également le faire pour les fenêtres recouvertes par celle-ci.
+\end{frame}
+
 
 
 \section{Gestion de la mémoire}
@@ -132,7 +144,7 @@
  \frametitle{Avantages}
  Cette représentation a plusieurs avantages :
  \begin{itemize}
-  \item Elle permet d'effectuer facilement (en théorie \ldots) la \foreign{garbage collection}, car en fonction du \codeC{tag} on sait si on a affaire à des entiers ou des pointeurs,
+  \item Elle permet d'effectuer facilement (en théorie\ldots) la \foreign{garbage collection}, car en fonction du \codeC{tag} on sait si on a affaire à des entiers ou des pointeurs,
   \item Toute les valeurs ont la même taille (sans compter les cellules pointées par l'un des membres), et il n'y a pas de tableau, ce qui simplifie la gestion des blocs en mémoire.
  \end{itemize}
 \end{frame}
@@ -143,8 +155,8 @@
 \begin{frame}[fragile]
  \frametitle{Schéma de la mémoire}
  
- \begin{tikzpicture}[arrow/.style={->, ultra thick, rounded corners, line cap=round},
-                     pointer/.style={circle, draw, fill = black, inner sep = 0.5mm},
+ \begin{tikzpicture}[arrow/.style   = {->, ultra thick, rounded corners, line cap = round},
+                     pointer/.style = {circle, draw, fill = black, inner sep = 0.5mm},
                      scale=0.5]
   \foreach \z in {0, 4} {
    \foreach \y in {0, ..., 8} \draw (\z,     \y) -- +(3, 0);
@@ -169,7 +181,7 @@
 \subsection{Le Garbage Collector}
 
 \begin{frame}
- \frametitle{GC}
+ \frametitle{Fonctionnement du GC}
  
  \foreign{Interim OS} utilise un \foreign{GC mark-and-sweep} classique.
  
@@ -177,35 +189,362 @@
   Un \foreign{GC mark-and-sweep} est un \foreign{GC} qui parcourt en profondeur le graphe des \codeC{Cells} en marquant les nœuds rencontrés. Dans une deuxième phase, on libère (\foreign {sweep}) les nœuds non visités en parcourant l'intégralité du tas.
  \end{exampleblock}
  
- Les racines sont la pile, les fichiers ouverts et l'environnement global.
+ Les racines sont composées de :
+ \begin{itemize}
+  \item la pile,
+  \item les fichiers ouverts,
+  \item l'environnement global.
+ \end{itemize}
 
+\end{frame}
+
+\begin{frame}
+ \frametitle{Complexité}
+ 
+ L'allocation d'une cellule s'effectue en $O(1)$.
+ 
+ Le marquage se fait en temps $O(|\mathrm{tas}| + |\mathrm{pile}| + |\mathrm{env}| + |\mathrm{fichiers}|)$ et en espace $\Omega($profondeur du tas$)$. Il est possible de l'effectuer en espace constant à l'aide de l'algorithme \foreign{pointer reversal} qui permet d'encoder la pile de récursion dans le tas lui-même.
+ 
+ Le balayage se fait en temps $O(|\mathrm{tas}|)$, et en espace en plus des deux tableaux précédents $O(1)$.
+ 
 \end{frame}
 
 
 
 \section{Compilation à la volée}
 
+\subsection{Primitives C}
+
 \begin{frame}
- \frametitle{TODO}
+ \frametitle{Mélange C-assembleur}
+ 
+ Le code s'appuie beaucoup sur le fait que les fonctions écrites en \foreign{C} sont accessibles depuis du code assembleur écrit pendant l'exécution du programme, ce qui permet d'utiliser notamment les fonctions d'allocations directement afin de pouvoir faire appel au \foreign{garbage collector} non seulement pour le code statique mais aussi pour du code écrit dans le \foreign{REPL} par exemple.
 \end{frame}
+
+\subsection{La fonction \code{compile\_expr}}
+
+\begin{frame}
+ \frametitle{Remarques notables}
+ 
+ On effectue de petites vérifications : définitions des symboles, typage statique et typage dynamique (lors de l'utilisation d'une fonction comme \codeLisp{get8}).
+ 
+ On adopte une stratégie d'\foreign{eager evaluation} pour les appels de fonction (passage par valeur) : tous les arguments sont d'abord évalués, passés par registres (maximum 4) puis sur la pile et enfin la fonction est appelée.
+ 
+ Lorsqu'on compile des définitions de fonctions, on précalcule l'espace de pile nécessaire à chaque fonction pour l'allouer en une seule fois lors de l'appel.
+\end{frame}
+
+
 
 \section{Améliorations apportées}
 
+\subsection{Optimisation de la garbage collection}
+
 \begin{frame}
- \frametitle{TODO}
+ \frametitle{Appels que lorsque nécessaire}
+ 
+ Nous avons remplacé les appels au \foreign{GC} par une nouvelle \foreign{builtin} \codeLisp{gc-if-needed} qui appelle le \foreign{GC} seulement si la mémoire est trop remplie.
+
+ On a obtenu les résultats suivants :
+ \begin{description}
+  \item [\foreign{GC} systématique :] 60 images en 90 unités de temps
+  \item [\foreign{GC} si nécessaire :] 60 images en 60 unités de temps
+ \end{description}
+\end{frame}
+
+\begin{frame}
+ \frametitle{Implémentation}
+ 
+ \tiny
+ \sourceC{alloc.c}{186}{191}{Appel du \foreign{GC} si nécessaire}
+ \begin{table}[H]
+  \centering
+  \inputminted[frame=lines,linenos,style=colorful,fontfamily=tt,breaklines,autogobble,firstline=1638,firstnumber=1638,lastline=1646,label={compiler\_new[1638--1646]}]{C}{../interim/sledge/compiler_new.c}
+  \captionsetup{name=Listing,labelformat=listing,labelsep=endash}
+  \caption{Ajout de la primitive}
+ \end{table}
+%  \sourceLisp{shell.l}{264}{264}{Appel de la fonction}
+\end{frame}
+
+ 
+\subsection{Système de tâches}
+
+\begin{frame}
+ \frametitle{Tâche du bureau}
+ 
+  Pour pallier aux problèmes précédemment cités, on a effectué les ajouts suivants :
+ \begin{itemize}
+  \item \codeLisp{desktop-task} pour afficher correctement le logo au fond et du texte,
+  \item \codeLisp{force-draw} qui donne un rendu correct (en provoquant le dessin des fenêtres inactives qui ont put être recouvertes) mais qui est très lent.
+ \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+ \frametitle{Implémentation}
+ 
+ \sourceLisp{shell.l}{227}{234}{Ajout de la tâche de bureau}
 \end{frame}
 
 
 
+\subsection{Analyse de la lenteur du rendu}
 
+\begin{frame}
+ \frametitle{Raisons}
+
+ Il se trouve que le rendu des fenêtres d'\foreign{Interim OS} est très lent. En effet une simple remise à blanc de l'écran par \foreign{frame} impacte drastiquement les performances en ralentissant l'exécution de l'ordre de 5 fois. Ceci n'est pas étonnant car toutes les opérations se font pixel par pixel. 
+ 
+ Il y a deux raisons à cela :
+ \begin{itemize}
+  \item les opérations graphiques devraient être gérées par le \foreign{GPU},
+  \item pour chaque pixel, il y a un certain coût fixe lié à l'interfaçage entre \foreign{Minilisp} et le \codeC{Filesystem} représentant l'écran puis le programme \foreign{C}.
+ \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+ \frametitle{Solution proposée}
+ 
+ Ainsi pour résoudre ce problème, il faudrait ajouter des primitives pour remplir directement une zone entière d'une certaine couleur. Si on assimile l'écran à un carré de pixels de coté $n$, alors on divise ainsi le coût fixe par un facteur proportionnel à $n^2$ puisqu'on ne le paye désormais qu'une seule fois par rectangle au lieu d'une fois par pixel.
+\end{frame}
 
 
 \appendix
 
+\tiny
+
 \section{Annexe}
-\subsection{Remplissage}
+
+\subsection{Liste des fichiers}
+
 \begin{frame}
- \frametitle{Truc}
-\end{frame}
+ \frametitle{Fichiers \foreign{C}}
  
+ \begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Nom du fichier & Contenu \tabularnewline
+    \hhline{|=|=|}
+    \code{strmap.[h|c]} & Opérations sur une table de hachage dont les clés sont des chaînes de caractères \tabularnewline
+    \hhline{|=|=|}
+    \code{minilisp.h} & Contient la représentation mémoire des valeurs du \foreign{Minilisp} \tabularnewline
+    \hhline{|=|=|}
+    \code{alloc.[h|c]} & Définition de l'environnement, des différents tas, du \foreign{garbage collector} et des fonctions d'allocations des différents types de cellules \tabularnewline
+    \hhline{|=|=|}
+    \code{utf8.[h|c]} & Conversion entre chaînes de caractères standard et l'encodage \foreign{UTF-8} \tabularnewline
+    \hline
+    \code{reader.[h|c]} & \foreign{Parser} de \foreign{minilisp} \tabularnewline
+    \hline
+    \code{writer.[h|c]} & Fonctions pour écrire une valeur \foreign{Minilisp} dans un \foreign{buffer} \tabularnewline
+    \hline
+    \code{stream.[h|c]} & Représentations des systèmes de fichiers, et fonctions pour les ouvrir, fermer, écrire\ldots \tabularnewline
+    \hhline{|=|=|}
+    \code{jit\_x64.c} & Fonctions pour écrire de l'assembleur \foreign{x86-64} \tabularnewline
+    \hline
+    \code{compiler\_new.[h|c]} & Compile une expression \foreign{Minilisp} en assembleur, et initialise l'environnement avec les primitives \foreign{Minilisp} \tabularnewline
+    \hline
+    \code{compiler\_x64\_hosted.c} & Compile l'expression en assembleur \foreign{x86-64}, l'exécute et renvoie le résultat de son exécution \tabularnewline
+    \hhline{|=|=|}
+    \code{sledge.c} & Contient la fonction principale, qui ouvre un \foreign{channel} passé en argument, y lit une expression qu'il \foreign{parse} et exécute avant d'afficher le résultat \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des fichiers \foreign{C}}
+ \end{table}
+\end{frame}
+
+\begin{frame}
+ \frametitle{Fichiers \foreign{Minilisp}}
+ 
+ \begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Nom du fichier & Contenu \tabularnewline
+    \hhline{|=|=|}
+    \code{lib.l} & Fonctions de base sur les listes et les chaînes de caractères \tabularnewline
+    \hline
+    \code{gfx.l} & Fonctions de base d'affichage de figures géométriques \tabularnewline
+    \hhline{|=|=|}
+    \code{mouse.l} & Gestion de la souris comme système de fichiers \tabularnewline
+    \hline
+    \code{net.l} & Communication sur internet (notamment par \foreign{IRC}) par un système de fichiers \tabularnewline
+    \hhline{|=|=|}
+    \code{editor.l} & Fonctionnement de l'éditeur : affichage, gestion des touches pressées, \ldots \tabularnewline
+    \hline
+    \code{repl.l} & Fonctionnement du \foreign{REPL (read-eval-print-loop)} : affichage, gestion de l'historique des commandes, \ldots \tabularnewline
+    \hline
+    \code{paint.l} & Application de dessin ? \tabularnewline
+    \hhline{|=|=|}
+    \code{shell.l} & Gestion des différentes tâches, ajout du logo, d'un éditeur et d'un \foreign{REPL} \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des fichiers \foreign{Minilisp}}
+ \end{table}
+\end{frame}
+
+
+\subsection{Liste des primitives Minilisp}
+
+\begin{frame}
+ \frametitle{Arithmétique et logique}
+ 
+ \begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Signature & Effet \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(bitand a b)} & Et bit-à-bit \tabularnewline
+    \hline
+    \codeLisp{(bitnot a b)} & Non bit-à-bit \tabularnewline
+    \hline
+    \codeLisp{(bitor a b)} & Ou inclusif bit-à-bit \tabularnewline
+    \hline
+    \codeLisp{(bitxor a b)} & Ou exclusif bit-à-bit \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(shl a b)} & Décalage logique vers la gauche \tabularnewline
+    \hline
+    \codeLisp{(shr a b)} & Décalage logique vers la droite \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(+ a b)} & Addition \tabularnewline
+    \hline
+    \codeLisp{(- a b)} & Soustraction \tabularnewline
+    \hline
+    \codeLisp{(* a b)} & Multiplication \tabularnewline
+    \hline
+    \codeLisp{(/ a b)} & Quotient de la division \tabularnewline
+    \hline
+    \codeLisp{(mod a b)} & Reste de la division \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(gt a b)} & Test de supériorité \tabularnewline
+    \hline
+    \codeLisp{(lt a b)} & Test d'infériorité \tabularnewline
+    \hline
+    \codeLisp{(= a b)} & Test d'égalité \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des \foreign{builtins} \foreign{Minilisp} arithmético-logiques}
+ \end{table}
+\end{frame}
+
+\begin{frame}
+ \frametitle{Contrôle}
+ 
+ \begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Signature & Effet \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(def x v)} & Définit globalement \codeLisp{x} comme valant \codeLisp{v} \tabularnewline
+    \hline
+    \codeLisp{(let x v)} & Définit \codeLisp{x} comme valant \codeLisp{v} (allocation locale sur la pile, qui pourra donc être \foreign{garbage-collectée}) \tabularnewline
+    \hline
+    \codeLisp{(fn x1 .. xn r)} & Renvoie une fonction à \code{n} arguments qui renvoie \codeLisp{r}, un argument est soit un symbole soit de la forme \codeLisp{(symb struct_def)}, et \codeLisp{symb} sera alors de type \codeLisp{struct_def} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(if b x y)} & Si \codeLisp{b} évalue à vrai, renvoie \codeLisp{x}, sinon \codeLisp{y} (qui doivent avoir le même type) \tabularnewline
+    \hline
+    \codeLisp{(while b e)} & Exécute \codeLisp{e} tant que \codeLisp{b} est vrai \tabularnewline
+    \hline
+    \codeLisp{(do x1 .. xn)} & Exécute \codeLisp{x1}, .., \codeLisp{xn} et renvoie \codeLisp{xn} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(car l)} & Renvoie la tête de la liste \codeLisp{l} \tabularnewline
+    \hline
+    \codeLisp{(cdr l)} & Renvoie la queue de la liste \codeLisp{l} \tabularnewline
+    \hline
+    \codeLisp{(cons x l)} & Renvoie la liste \codeLisp{(x l)} \tabularnewline
+    \hline
+    \codeLisp{(list x1 .. xn)} & Renvoie \codeLisp{(cons x1 (.. (cons xn-1 xn)..))} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(struct s c1 x1 .. cn xn)} & Définit \codeLisp{s} comme une structure contenant \code{n} champs dont les noms sont \codeLisp{fi} et les valeurs par défaut \codeLisp{xi} \tabularnewline
+    \hline
+    \codeLisp{(new s)} & Alloue et renvoie une structure de type \codeLisp{s} \tabularnewline
+    \hline
+    \codeLisp{(sget s c)} & Renvoie la valeur du champ \codeLisp{c} de la structure \codeLisp{s} \tabularnewline
+    \hline
+    \codeLisp{(sput s c v)} & Affecte la valeur \codeLisp{v} au champ \codeLisp{c} de la structure \codeLisp{s} \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des \foreign{builtins} \foreign{Minilisp} de contrôle}
+ \end{table}
+\end{frame}
+
+\begin{frame}
+ \frametitle{Mémoire}
+ 
+ \begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Signature & Effet \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(quote x)} & Renvoie l'adresse du symbole \codeLisp{x} \tabularnewline
+    \hline
+    \codeLisp{(concat s t)} & Renvoie la concaténation des chaînes \codeLisp{s} et \codeLisp{t} \tabularnewline
+    \hline
+    \codeLisp{(substr s a b)} & Renvoie une copie de la chaîne \codeLisp{s} entre \codeLisp{a} et \codeLisp{b} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(get8 s i)} & Renvoie l'octet de la chaîne \codeLisp{s} situé en position \codeLisp{i} \tabularnewline
+    \hline
+    \codeLisp{(get16 s i)} & Renvoie deux octets de la chaîne \codeLisp{s} à partir de \codeLisp{i} \tabularnewline
+    \hline
+    \codeLisp{(get32 s i)} & Renvoie quatre octets de la chaîne \codeLisp{s} à partir \codeLisp{i} \tabularnewline
+    \hline
+    \codeLisp{(put8 s i v)} & Modifie l'octet de la chaîne \codeLisp{s} situé en position \codeLisp{i} \tabularnewline
+    \hline
+    \codeLisp{(put16 s i v)} & Modifie deux octets de la chaîne \codeLisp{s} à partir de \codeLisp{i} \tabularnewline
+    \hline
+    \codeLisp{(put32 s i v)} & Modifie quatre octets de la chaîne \codeLisp{s} à partir \codeLisp{i} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(alloc n)} & Alloue et renvoie \codeLisp{n} octets \tabularnewline
+    \hline
+    \codeLisp{(alloc_str n)} & Alloue et renvoie une chaîne de \codeLisp{n} caractères \tabularnewline
+    \hline
+    \codeLisp{(bytes_to_str b n)} & Alloue et renvoie une chaîne de \codeLisp{n} caractères obtenues depuis \codeLisp{b} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(size x)} & Renvoie la taille de \codeLisp{x} en mémoire \tabularnewline
+    \hline
+    \codeLisp{(gc)} & Appelle la fonction \codeC{collect_garbage} \tabularnewline
+    \hline
+    \codeLisp{(symbols)} & Renvoie la liste des symboles connus \tabularnewline
+    \hline
+    \codeLisp{(debug)} & Devrait appeler \codeC{platform_debug} mais a été commenté \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des \foreign{builtins} \foreign{Minilisp} de gestion de la mémoire}
+ \end{table}
+\end{frame}
+
+\begin{frame}
+ \frametitle{Fichiers}
+ 
+ \begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{|C|C|}
+    \hline
+    Signature & Effet \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(write x b)} & Écrit la représentation de \codeLisp{x} dans le \foreign{buffer} \codeLisp{b} \tabularnewline
+    \hline
+    \codeLisp{(read b)} & Lit le code \foreign{Minilisp} situé dans le \foreign{buffer} \codeLisp{b} et renvoie une valeur \foreign{Minilisp} correspondante \tabularnewline
+    \codeLisp{(eval x)} & Exécute le code situé dans \codeLisp{x} (typiquement renvoyé par \codeLisp{read}) en appelant \codeC{platform_eval} \tabularnewline
+    \hhline{|=|=|}
+    \codeLisp{(print s)} & Affiche la (liste de) chaîne(s) de caractères \codeLisp{s} \tabularnewline
+    \hline
+    \codeLisp{(mount p h)} & Monte le fichier à l'emplacement \codeLisp{p}, où \codeLisp{h} est une liste de fonctions permettant d'opérer sur le fichier (inutilisé) \tabularnewline
+    \hline
+    \codeLisp{(mmap p)} & Applique l'opérateur \codeLisp{mmap} du système de fichier considéré au fichier à l'emplacement \codeLisp{p} \tabularnewline
+    \hline
+    \codeLisp{(open p)} & Ouvre le fichier à l'emplacement \codeLisp{p} \tabularnewline
+    \hline
+    \codeLisp{(recv f)} & Lit le fichier \codeLisp{f} \tabularnewline
+    \hline
+    \codeLisp{(send f s)} & Écrit la (liste de) chaîne(s) de caractères \codeLisp{s} dans le fichier \codeLisp{f} \tabularnewline
+    \hline
+  \end{tabularx}
+  \caption{Liste des \foreign{builtins} \foreign{Minilisp} de gestion des fichiers}
+ \end{table}
+\end{frame}
+
 \end{document}

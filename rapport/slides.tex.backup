@@ -8,7 +8,7 @@
 \usepackage[frenchb]{babel}
 \usepackage{lmodern}
 \usepackage[autolanguage]{numprint}
-% \usepackage{enumitem}
+% \usepackage{enumitem}  % Si rajouté, fais bugger les puces des listes
 \usepackage{array}
 \usepackage{tabularx} \newcolumntype{C}{>{\centering}X}
 \usepackage{multirow}
@@ -114,9 +114,21 @@
 \subsection{Section écrite en Minilisp}
 
 \begin{frame}
- \frametitle{TODO}
- Si tu pouvais me rédiger (au moins un brouillon) cette partie, ce serait pas mal parce que je pense que tu connais mieux que moi.
+ \frametitle{Fonctions présentes}
+ 
+ On a accès à toutes les primitives \foreign{C} qui permettent par exemple de changer la couleur d'un pixel de l'écran, de lancer le \foreign{garbage collector}\ldots
+ 
+ Les entrées/sorties du point de vue de l'OS sont toutes représentées par des \codeC{Filesystems} (souris, clavier, réseau, disque dur, écran). Ceci permet une certaine abstraction pour la gestion de ceux-ci (par exemple : \codeLisp{(load "/framebuffer/width")}).
 \end{frame}
+
+\begin{frame}
+ \frametitle{Gestion des fenêtres}
+ 
+ Le fichier \code{shell.l} se charge de gérer les fenêtres : il maintient une liste de tâches, chacune représentant une fenêtre.
+ 
+ Il y a une tentative de ne pas tout dessiner à chaque cycle pour ne recalculer uniquement les pixels qui sont modifiés. Le résultat est cependant décevant : souvent certains pixels ne sont pas mis à jour mais devraient l'être. Ainsi, lorsque l'on déplace une fenêtre, l'\foreign{OS} ne recalcule que la fenêtre déplacée alors qu'il faudrait également le faire pour les fenêtres recouvertes par celle-ci.
+\end{frame}
+
 
 
 \section{Gestion de la mémoire}
@@ -132,7 +144,7 @@
  \frametitle{Avantages}
  Cette représentation a plusieurs avantages :
  \begin{itemize}
-  \item Elle permet d'effectuer facilement (en théorie \ldots) la \foreign{garbage collection}, car en fonction du \codeC{tag} on sait si on a affaire à des entiers ou des pointeurs,
+  \item Elle permet d'effectuer facilement (en théorie\ldots) la \foreign{garbage collection}, car en fonction du \codeC{tag} on sait si on a affaire à des entiers ou des pointeurs,
   \item Toute les valeurs ont la même taille (sans compter les cellules pointées par l'un des membres), et il n'y a pas de tableau, ce qui simplifie la gestion des blocs en mémoire.
  \end{itemize}
 \end{frame}
@@ -143,8 +155,8 @@
 \begin{frame}[fragile]
  \frametitle{Schéma de la mémoire}
  
- \begin{tikzpicture}[arrow/.style={->, ultra thick, rounded corners, line cap=round},
-                     pointer/.style={circle, draw, fill = black, inner sep = 0.5mm},
+ \begin{tikzpicture}[arrow/.style   = {->, ultra thick, rounded corners, line cap = round},
+                     pointer/.style = {circle, draw, fill = black, inner sep = 0.5mm},
                      scale=0.5]
   \foreach \z in {0, 4} {
    \foreach \y in {0, ..., 8} \draw (\z,     \y) -- +(3, 0);
@@ -169,34 +181,113 @@
 \subsection{Le Garbage Collector}
 
 \begin{frame}
- \frametitle{GC}
+ \frametitle{Fonctionnement du GC}
+ 
+ \foreign{Interim OS} utilise un \foreign{GC mark-and-sweep} classique.
+ 
+ \begin{exampleblock}{\foreign{GC mark-and-sweep}}
+  Un \foreign{GC mark-and-sweep} est un \foreign{GC} qui parcourt en profondeur le graphe des \codeC{Cells} en marquant les nœuds rencontrés. Dans une deuxième phase, on libère (\foreign {sweep}) les nœuds non visités en parcourant l'intégralité du tas.
+ \end{exampleblock}
+ 
+ Les racines sont composées de :
+ \begin{itemize}
+  \item la pile,
+  \item les fichiers ouverts,
+  \item l'environnement global.
+ \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+ \frametitle{Complexité}
+ 
+ L'allocation d'une cellule s'effectue en $O(1)$.
+ 
+ Le marquage se fait en temps $O(|\mathrm{tas}| + |\mathrm{pile}| + |\mathrm{env}| + |\mathrm{fichiers}|)$ et en espace $\Omega(\mathrm{profondeur\ du\ tas})$. Il est possible de l'effectuer en espace constant à l'aide de l'algorithme \foreign{pointer reversal} qui permet d'encoder la pile de récursion dans le tas lui-même.
+ 
+ Le balayage se fait en temps $O(|\mathrm{tas}|)$, et en espace en plus des deux tableaux précédents $O(1)$.
+ 
 \end{frame}
 
 
 
 \section{Compilation à la volée}
 
+\subsection{Primitives C}
+
 \begin{frame}
- \frametitle{TODO}
+ \frametitle{Mélange C-assembleur}
+ 
+ Le code s'appuie beaucoup sur le fait que les fonctions écrites en \foreign{C} sont accessibles depuis du code assembleur écrit pendant l'exécution du programme, ce qui permet d'utiliser notamment les fonctions d'allocations directement afin de pouvoir faire appel au \foreign{garbage collector} non seulement pour le code statique mais aussi pour du code écrit dans le \foreign{REPL} par exemple.
 \end{frame}
+
+\subsection{La fonction \code{compile\_expr}}
+
+\begin{frame}
+ \frametitle{Remarques notables}
+ 
+ On effectue de petites vérifications : définitions des symboles, typage statique et typage dynamique (lors de l'utilisation d'une fonction comme \codeLisp{get8}).
+ 
+ On adopte une stratégie d'\foreign{eager evaluation} pour les appels de fonction (passage par valeur) : tous les arguments sont d'abord évalués, passés par registres (maximum 4) puis sur la pile et enfin la fonction est appelée.
+ 
+ Lorsqu'on compile des définitions de fonctions, on précalcule l'espace de pile nécessaire à chaque fonction pour l'allouer en une seule fois lors de l'appel.
+\end{frame}
+
+
 
 \section{Améliorations apportées}
 
-\begin{frame}
- \frametitle{TODO}
-\end{frame}
+\subsection{Optimisation du \foreign{garbage collecting}}
 
+Les appels aux \foreign{GC} sont coûteux car il faut alors explorer toutes les références pour savoir si une \codeC{Cell} est encore utilisée ou non. Ils sont cependant nécessaires car le programme risque de tomber à court de mémoire. Dans \code{shell.l}, on remarque qu'après l'exécution et le dessin de chaque \foreign{frame}, le \foreign{GC} est appelé. Parfois, la mémoire est encore loin d'être pleine et il n'est alors pas nécessaire de faire cet appel. Nous l'avons ainsi remplacé par une nouvelle fonction native (\foreign{builtin}) \codeLisp{gc-if-needed} qui appelle le \foreign{GC} seulement si la mémoire est trop remplie. De cette manière, il n'y a pas de problème de mémoire et on mesure, lorsque le système est inactif un gain de performances de 50\%. Malheureusement, en activité, les gains sont bien moins importants car la mémoire est utilisée intensivement et se remplit vite.
 
+On a obtenu les résultats suivants :
+\begin{description}
+  \item [\foreign{GC} systématique :] 60 images en 90 unités de temps
+  \item [\foreign{GC} si nécessaire :] 60 images en 60 unités de temps
+\end{description}
 
+Implémentation :
+\sourceC{alloc.c}{186}{191}{Appel du \foreign{GC} si nécessaire}
+\begin{table}[H]
+  \centering
+  \inputminted[frame=lines,linenos,style=colorful,fontfamily=tt,breaklines,autogobble,firstline=1638,firstnumber=1638,lastline=1646,label={compiler\_new[1638--1646]}]{C}{../interim/sledge/compiler_new.c}
+  \captionsetup{name=Listing,labelformat=listing,labelsep=endash,labelfont={sc}}
+  \caption{Ajout de la primitive}
+\end{table}
+\sourceLisp{shell.l}{264}{264}{Appel de la fonction}
 
-
-
-\appendix
-
-\section{Annexe}
-\subsection{Remplissage}
-\begin{frame}
- \frametitle{Truc}
-\end{frame}
  
+\subsection{Système de tâches}
+
+\begin{frame}
+ \frametitle{Tâche du bureau}
+ 
+  Pour pallier aux problèmes précédemment cités, on a effectué les ajouts suivants :
+ \begin{itemize}
+  \item \codeLisp{desktop-task} pour afficher correctement le logo au fond et du texte,
+  \item \codeLisp{force-draw} qui donne un rendu correct (en provoquant le dessin des fenêtres inactives qui ont put être recouvertes) mais qui est très lent.
+ \end{itemize}
+ \sourceLisp{shell.l}{227}{234}{Ajout de la tâche de bureau}
+
+\end{frame}
+
+
+\subsection{Analyse de la lenteur du rendu}
+
+Il se trouve que le rendu des fenêtres d'\foreign{Interim OS} est très lent. En effet une simple remise à blanc de l'écran par \foreign{frame} impacte drastiquement les performances en ralentissant l'exécution de l'ordre de 5 fois. Ceci n'est pas étonnant car toutes les opérations se font pixel par pixel. 
+
+D'une part, ce genre de travail sur des pixels n'est pas adapté pour un \foreign{CPU} et devrait être exécuté par un \foreign{GPU}. D'autre part, il est normalement possible de faire de telles opérations simples et de s'en tirer avec une vitesse d'affichage correcte même sans accélération \foreign{GPU}, mais ici pour chaque pixel, il y a un certain coût fixe lié à l'interfaçage entre \foreign{Minilisp} et le \codeC{Filesystem} représentant l'écran puis le programme \foreign{C}. 
+
+Ainsi pour résoudre ce problème, il faudrait ajouter des primitives pour remplir directement une zone entière d'une certaine couleur. Si on assimile l'écran à un carré de pixels de coté $n$, alors on divise ainsi le coût fixe par un facteur proportionnel à $n^2$ puisqu'on ne le paye désormais qu'une seule fois par rectangle au lieu d'une fois par pixel.
+
+
+% \appendix
+% 
+% \section{Annexe}
+% \subsection{Remplissage}
+% \begin{frame}
+%  \frametitle{Truc}
+% \end{frame}
+%  
 \end{document}

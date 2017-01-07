@@ -5,11 +5,17 @@
 \beamer@subsectionintoc {1}{1}{Architecture g\IeC {\'e}n\IeC {\'e}rale}{2}{0}{1}
 \beamer@subsectionintoc {1}{2}{Section \IeC {\'e}crite en C}{3}{0}{1}
 \beamer@subsectionintoc {1}{3}{Section \IeC {\'e}crite en Minilisp}{4}{0}{1}
-\beamer@sectionintoc {2}{Gestion de la m\IeC {\'e}moire}{5}{0}{2}
-\beamer@subsectionintoc {2}{1}{Repr\IeC {\'e}sentation des valeurs Minilisp}{5}{0}{2}
-\beamer@subsectionintoc {2}{2}{Allocation de la m\IeC {\'e}moire}{7}{0}{2}
-\beamer@subsectionintoc {2}{3}{Le Garbage Collector}{8}{0}{2}
-\beamer@sectionintoc {3}{Compilation \IeC {\`a} la vol\IeC {\'e}e}{9}{0}{3}
-\beamer@sectionintoc {4}{Am\IeC {\'e}liorations apport\IeC {\'e}es}{10}{0}{4}
-\beamer@sectionintoc {5}{Annexe}{11}{1}{5}
-\beamer@subsectionintoc {5}{1}{Remplissage}{11}{1}{5}
+\beamer@sectionintoc {2}{Gestion de la m\IeC {\'e}moire}{6}{0}{2}
+\beamer@subsectionintoc {2}{1}{Repr\IeC {\'e}sentation des valeurs Minilisp}{6}{0}{2}
+\beamer@subsectionintoc {2}{2}{Allocation de la m\IeC {\'e}moire}{8}{0}{2}
+\beamer@subsectionintoc {2}{3}{Le Garbage Collector}{9}{0}{2}
+\beamer@sectionintoc {3}{Compilation \IeC {\`a} la vol\IeC {\'e}e}{11}{0}{3}
+\beamer@subsectionintoc {3}{1}{Primitives C}{11}{0}{3}
+\beamer@subsectionintoc {3}{2}{La fonction \texttt {compile\_expr}}{12}{0}{3}
+\beamer@sectionintoc {4}{Am\IeC {\'e}liorations apport\IeC {\'e}es}{13}{0}{4}
+\beamer@subsectionintoc {4}{1}{Optimisation de la garbage collection}{13}{0}{4}
+\beamer@subsectionintoc {4}{2}{Syst\IeC {\`e}me de t\IeC {\^a}ches}{15}{0}{4}
+\beamer@subsectionintoc {4}{3}{Analyse de la lenteur du rendu}{17}{0}{4}
+\beamer@sectionintoc {5}{Annexe}{19}{1}{5}
+\beamer@subsectionintoc {5}{1}{Liste des fichiers}{19}{1}{5}
+\beamer@subsectionintoc {5}{2}{Liste des primitives Minilisp}{21}{1}{5}

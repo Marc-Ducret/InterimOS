@@ -1,7 +1,7 @@
 \frametitle{Schéma de la mémoire}
 
- \begin{tikzpicture}[arrow/.style={->, ultra thick, rounded corners, line cap=round},
-                     pointer/.style={circle, draw, fill = black, inner sep = 0.5mm},
+ \begin{tikzpicture}[arrow/.style   = {->, ultra thick, rounded corners, line cap = round},
+                     pointer/.style = {circle, draw, fill = black, inner sep = 0.5mm},
                      scale=0.5]
   \foreach \z in {0, 4} {
    \foreach \y in {0, ..., 8} \draw (\z,     \y) -- +(3, 0);

@@ -1,0 +1,270 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGcolorful{p}{(}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{ls} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{split} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{load} \PYGcolorful{l+s}{\PYGcolorfulZdq{}/sd/\PYGcolorfulZdq{}}\PYGcolorful{p}{)} \PYGcolorful{n+nv}{[0a]}\PYGcolorful{p}{)}
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{struct} \PYGcolorful{n+nv}{task}
+  \PYGcolorful{n+nv}{id} \PYGcolorful{l+m+mi}{0}
+  \PYGcolorful{n+nv}{name} \PYGcolorful{l+s}{\PYGcolorfulZdq{}untitled task\PYGcolorfulZdq{}}
+  \PYGcolorful{n+nv}{focused} \PYGcolorful{l+m+mi}{0}
+  \PYGcolorful{n+nv}{z} \PYGcolorful{l+m+mi}{0}
+  \PYGcolorful{n+nv}{needs\PYGcolorfulZhy{}redraw} \PYGcolorful{l+m+mi}{0}
+  \PYGcolorful{n+nv}{redrawn} \PYGcolorful{l+m+mi}{0}
+  \PYGcolorful{n+nv}{surface} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{surface}\PYGcolorful{p}{))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{draw\PYGcolorfulZhy{}logo} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{n+nv}{ox} \PYGcolorful{n+nv}{oy} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{c} \PYGcolorful{n+nv}{0xf0f0}\PYGcolorful{p}{)} \PYGcolorful{c+c1}{; @0xff8e \PYGcolorfulZhy{}\PYGcolorfulZgt{} 0xf0f0}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{line} \PYGcolorful{n+nv}{fb} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{16}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{38}\PYGcolorful{p}{))} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{16}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{102}\PYGcolorful{p}{))} \PYGcolorful{n+nv}{c}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{line} \PYGcolorful{n+nv}{fb} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{16}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{102}\PYGcolorful{p}{))} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{80}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{38}\PYGcolorful{p}{))} \PYGcolorful{n+nv}{c}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{line} \PYGcolorful{n+nv}{fb} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{80}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{38}\PYGcolorful{p}{))} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{80}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{102}\PYGcolorful{p}{))} \PYGcolorful{n+nv}{c}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{line} \PYGcolorful{n+nv}{fb} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{80}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{102}\PYGcolorful{p}{))} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{144}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{38}\PYGcolorful{p}{))} \PYGcolorful{n+nv}{c}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{line} \PYGcolorful{n+nv}{fb} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{144}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{38}\PYGcolorful{p}{))} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{144}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{102}\PYGcolorful{p}{))} \PYGcolorful{n+nv}{c}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{line} \PYGcolorful{n+nv}{fb} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{144}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{102}\PYGcolorful{p}{))} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{208}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{38}\PYGcolorful{p}{))} \PYGcolorful{n+nv}{c}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{line} \PYGcolorful{n+nv}{fb} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{208}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{38}\PYGcolorful{p}{))} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{208}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{102}\PYGcolorful{p}{))} \PYGcolorful{n+nv}{c}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{line} \PYGcolorful{n+nv}{fb} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{208}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{102}\PYGcolorful{p}{))} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{pt} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{ox} \PYGcolorful{l+m+mi}{272}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{oy} \PYGcolorful{l+m+mi}{102}\PYGcolorful{p}{))} \PYGcolorful{n+nv}{c}\PYGcolorful{p}{)}
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{desktop\PYGcolorfulZhy{}func} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{p}{(}\PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{task}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{needs\PYGcolorfulZhy{}redraw}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+    \PYGcolorful{p}{(}\PYGcolorful{n+nv}{blit\PYGcolorfulZhy{}str} \PYGcolorful{n+nv}{fb} \PYGcolorful{n+nv}{unifont} \PYGcolorful{l+s}{\PYGcolorfulZdq{}Lusin\PYGcolorfulZdq{}} \PYGcolorful{l+m+mi}{100} \PYGcolorful{l+m+mi}{100}\PYGcolorful{p}{)}
+   \PYGcolorful{p}{(}\PYGcolorful{n+nv}{draw\PYGcolorfulZhy{}logo} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{/} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{fb} \PYGcolorful{n+nv}{width}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{2}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{140}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{/} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{fb} \PYGcolorful{n+nv}{height}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{2}\PYGcolorful{p}{))}
+   \PYGcolorful{p}{(}\PYGcolorful{n+nv}{draw\PYGcolorfulZhy{}logo} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{/} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{fb} \PYGcolorful{n+nv}{width}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{2}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{139}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{/} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{fb} \PYGcolorful{n+nv}{height}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{2}\PYGcolorful{p}{))}
+   \PYGcolorful{p}{(}\PYGcolorful{n+nv}{draw\PYGcolorfulZhy{}logo} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{/} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{fb} \PYGcolorful{n+nv}{width}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{2}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{140}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{l+m+mi}{1} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{/} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{fb} \PYGcolorful{n+nv}{height}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{2}\PYGcolorful{p}{)))}
+   \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{needs\PYGcolorfulZhy{}redraw} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)} 
+  \PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{l+m+mi}{0}
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{keyboard} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{open} \PYGcolorful{l+s}{\PYGcolorfulZdq{}/keyboard\PYGcolorfulZdq{}}\PYGcolorful{p}{))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nb}{import} \PYGcolorful{l+s}{\PYGcolorfulZdq{}/sd/os/mouse.l\PYGcolorfulZdq{}}\PYGcolorful{p}{)}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{tasks} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{list}\PYGcolorful{p}{))}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{new\PYGcolorfulZhy{}tasks} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{list}\PYGcolorful{p}{))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{add\PYGcolorfulZhy{}task} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}func} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}obj} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}state} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{tasks} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{cons} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{list} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}func} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}obj} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}state}\PYGcolorful{p}{)} \PYGcolorful{n+nv}{tasks}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{list\PYGcolorfulZhy{}size} \PYGcolorful{n+nv}{tasks}\PYGcolorful{p}{)}
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}func} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}obj} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}state} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{print} \PYGcolorful{l+s}{\PYGcolorfulZdq{}empty task\PYGcolorfulZhy{}func\PYGcolorfulZdq{}}\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{paint\PYGcolorfulZhy{}task} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{p}{(}\PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{task}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{redrawn}\PYGcolorful{p}{)}
+    \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+      \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}surf} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{surface}\PYGcolorful{p}{))}
+      \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{x} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}surf} \PYGcolorful{n+nv}{x}\PYGcolorful{p}{))}
+      \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{y} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}surf} \PYGcolorful{n+nv}{y}\PYGcolorful{p}{))}
+      \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{w} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}surf} \PYGcolorful{n+nv}{width}\PYGcolorful{p}{))}
+      \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{h} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}surf} \PYGcolorful{n+nv}{height}\PYGcolorful{p}{))}
+      \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{and} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{gt} \PYGcolorful{n+nv}{w} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{gt} \PYGcolorful{n+nv}{h} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{))} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+        \PYGcolorful{p}{(}\PYGcolorful{n+nv}{box} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}surf} \PYGcolorful{l+m+mi}{0} \PYGcolorful{l+m+mi}{0} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{w} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{h} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+        \PYGcolorful{p}{(}\PYGcolorful{n+nv}{box} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}surf} \PYGcolorful{l+m+mi}{0} \PYGcolorful{l+m+mi}{0} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{w} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{20} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+        \PYGcolorful{p}{(}\PYGcolorful{n+nv}{box} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}surf} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{w} \PYGcolorful{l+m+mi}{16}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{h} \PYGcolorful{l+m+mi}{16}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{w} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{h} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+        \PYGcolorful{p}{(}\PYGcolorful{n+nv}{blit\PYGcolorfulZhy{}str} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}surf} \PYGcolorful{n+nv}{unifont} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{name}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{2} \PYGcolorful{l+m+mi}{2}\PYGcolorful{p}{)}
+        \PYGcolorful{p}{(}\PYGcolorful{n+nv}{blit} \PYGcolorful{n+nv}{fb} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}surf}\PYGcolorful{p}{)}
+      \PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+      \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{redrawn} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{))}
+    \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{l+m+mi}{0}
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{null\PYGcolorfulZhy{}task} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{task}\PYGcolorful{p}{))}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{null\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{id} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)} \PYGcolorful{c+c1}{; \PYGcolorfulZdq{}null\PYGcolorfulZdq{} task}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{focused\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{null\PYGcolorfulZhy{}task}\PYGcolorful{p}{)}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{point\PYGcolorfulZhy{}in\PYGcolorfulZhy{}rect} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{n+nv}{px} \PYGcolorful{n+nv}{py} \PYGcolorful{n+nv}{x} \PYGcolorful{n+nv}{y} \PYGcolorful{n+nv}{x2} \PYGcolorful{n+nv}{y2} 
+  \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{gt} \PYGcolorful{n+nv}{px} \PYGcolorful{n+nv}{x}\PYGcolorful{p}{)}
+    \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{gt} \PYGcolorful{n+nv}{py} \PYGcolorful{n+nv}{y}\PYGcolorful{p}{)}
+      \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{lt} \PYGcolorful{n+nv}{px} \PYGcolorful{n+nv}{x2}\PYGcolorful{p}{)}
+        \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{lt} \PYGcolorful{n+nv}{py} \PYGcolorful{n+nv}{y2}\PYGcolorful{p}{)}
+          \PYGcolorful{l+m+mi}{1} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}resizing} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{focus\PYGcolorfulZhy{}given} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{force\PYGcolorfulZhy{}draw} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{c+c1}{;@added}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{check\PYGcolorfulZhy{}task\PYGcolorfulZhy{}focus} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{p}{(}\PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{task}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{surf}  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{surface}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{x} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{x}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{y} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{y}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{x2} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{x} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{width}\PYGcolorful{p}{)))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{y2} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{y} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{height}\PYGcolorful{p}{)))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{z} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{z}\PYGcolorful{p}{))}
+
+  \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{not} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}dragging}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+    \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}resizing} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+    \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{already\PYGcolorfulZhy{}focused} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{focused}\PYGcolorful{p}{))}
+    \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{point\PYGcolorfulZhy{}in\PYGcolorfulZhy{}rect} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}x} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}y} \PYGcolorful{n+nv}{x} \PYGcolorful{n+nv}{y} \PYGcolorful{n+nv}{x2} \PYGcolorful{n+nv}{y2}\PYGcolorful{p}{)}
+      \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{not} \PYGcolorful{n+nv}{focus\PYGcolorfulZhy{}given}\PYGcolorful{p}{)}
+        \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+          \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{focus\PYGcolorfulZhy{}given} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)}
+          \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{focused} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)} 
+      \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{focused} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)))} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{n+nv}{force\PYGcolorfulZhy{}draw} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{needs\PYGcolorfulZhy{}redraw} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{redrawn} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}dragging} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do} 
+    \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{focused}\PYGcolorful{p}{)}
+      \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+             \PYGcolorful{p}{(}\PYGcolorful{n+nv}{boxfill} \PYGcolorful{n+nv}{fb} \PYGcolorful{n+nv}{x} \PYGcolorful{n+nv}{y} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{x2} \PYGcolorful{n+nv}{x}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{y2} \PYGcolorful{n+nv}{y}\PYGcolorful{p}{)} \PYGcolorful{n+nv}{0xffff}\PYGcolorful{p}{)}
+              \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{or} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}resizing} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{and} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{gt} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}x} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{x2} \PYGcolorful{l+m+mi}{16}\PYGcolorful{p}{))} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{gt} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}y} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{\PYGcolorfulZhy{}} \PYGcolorful{n+nv}{y2} \PYGcolorful{l+m+mi}{16}\PYGcolorful{p}{))))}
+                \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do} \PYGcolorful{c+c1}{; resize}
+                  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{nw} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{width}\PYGcolorful{p}{)} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}dx}\PYGcolorful{p}{))}
+                  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{nh} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{height}\PYGcolorful{p}{)} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}dy}\PYGcolorful{p}{))}
+                  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{width} \PYGcolorful{n+nv}{nw}\PYGcolorful{p}{)}
+                  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{height} \PYGcolorful{n+nv}{nh}\PYGcolorful{p}{)}
+                  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{pitch} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{*} \PYGcolorful{l+m+mi}{2} \PYGcolorful{n+nv}{nw}\PYGcolorful{p}{))}
+                  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{pixels} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{alloc} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{*} \PYGcolorful{l+m+mi}{2} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{*} \PYGcolorful{n+nv}{nw} \PYGcolorful{n+nv}{nh}\PYGcolorful{p}{))))}
+                  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{needs\PYGcolorfulZhy{}redraw} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)}
+                  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}resizing} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{c+c1}{; sticky}
+                  \PYGcolorful{p}{)}
+                \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do} \PYGcolorful{c+c1}{; move}
+                  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{x} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}dx} \PYGcolorful{n+nv}{x}\PYGcolorful{p}{))}
+                  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{y} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}dy} \PYGcolorful{n+nv}{y}\PYGcolorful{p}{)))} \PYGcolorful{p}{)}
+              \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{redrawn} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{))} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{l+m+mi}{0}
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{focused\PYGcolorfulZhy{}at\PYGcolorfulZhy{}mouse} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{p}{(}\PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{task}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{surf}  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{surface}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{x} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{x}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{y} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{y}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{x2} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{x} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{width}\PYGcolorful{p}{)))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{y2} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{y} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{height}\PYGcolorful{p}{)))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{point\PYGcolorfulZhy{}in\PYGcolorfulZhy{}rect} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}x} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}y} \PYGcolorful{n+nv}{x} \PYGcolorful{n+nv}{y} \PYGcolorful{n+nv}{x2} \PYGcolorful{n+nv}{y2}\PYGcolorful{p}{)}
+    \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{focused}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{run\PYGcolorfulZhy{}tasks} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{tl} \PYGcolorful{n+nv}{tasks}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{new\PYGcolorfulZhy{}tl} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{list}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{i} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{highest\PYGcolorfulZhy{}z\PYGcolorfulZhy{}at\PYGcolorfulZhy{}mouse} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{focus\PYGcolorfulZhy{}given} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{while} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{car} \PYGcolorful{n+nv}{tl}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+    \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}item}  \PYGcolorful{p}{(}\PYGcolorful{n+nb}{car} \PYGcolorful{n+nv}{tl}\PYGcolorful{p}{))}
+    \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}obj}   \PYGcolorful{p}{(}\PYGcolorful{n+nb}{car} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{cdr} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}item}\PYGcolorful{p}{)))}
+    \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{focus\PYGcolorfulZhy{}given} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{or} \PYGcolorful{n+nv}{focus\PYGcolorfulZhy{}given} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{focused\PYGcolorfulZhy{}at\PYGcolorfulZhy{}mouse} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}obj}\PYGcolorful{p}{)))}
+    \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{tl} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{cdr} \PYGcolorful{n+nv}{tl}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{tl} \PYGcolorful{n+nv}{tasks}\PYGcolorful{p}{)}
+
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{while} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{car} \PYGcolorful{n+nv}{tl}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+    \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}item}  \PYGcolorful{p}{(}\PYGcolorful{n+nb}{car} \PYGcolorful{n+nv}{tl}\PYGcolorful{p}{))}
+    \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}func}  \PYGcolorful{p}{(}\PYGcolorful{n+nb}{car} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}item}\PYGcolorful{p}{))}
+    \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}obj}   \PYGcolorful{p}{(}\PYGcolorful{n+nb}{car} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{cdr} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}item}\PYGcolorful{p}{)))}
+    \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}state} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{car} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{cdr} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{cdr} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}item}\PYGcolorful{p}{))))}
+
+   \PYGcolorful{p}{(}\PYGcolorful{n+nv}{check\PYGcolorfulZhy{}task\PYGcolorfulZhy{}focus} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}obj}\PYGcolorful{p}{)}
+
+    \PYGcolorful{p}{(}\PYGcolorful{n+nv}{task\PYGcolorfulZhy{}func} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}obj} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}state}\PYGcolorful{p}{)}
+    \PYGcolorful{p}{(}\PYGcolorful{n+nv}{paint\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{task\PYGcolorfulZhy{}obj}\PYGcolorful{p}{)}
+
+    \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{i} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{i} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))}
+    \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{tl} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{cdr} \PYGcolorful{n+nv}{tl}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{))}
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{c+c1}{;(def zz (fn (import \PYGcolorfulZdq{}/sd/tests/gtn.l\PYGcolorfulZdq{})))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{cursor\PYGcolorfulZhy{}blink} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{cursor\PYGcolorfulZhy{}blink\PYGcolorfulZhy{}delay} \PYGcolorful{l+m+mi}{20}\PYGcolorful{p}{)}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nb}{import} \PYGcolorful{l+s}{\PYGcolorfulZdq{}/sd/os/repl.l\PYGcolorfulZdq{}}\PYGcolorful{p}{)}
+\PYGcolorful{p}{(}\PYGcolorful{n+nb}{import} \PYGcolorful{l+s}{\PYGcolorfulZdq{}/sd/os/editor.l\PYGcolorfulZdq{}}\PYGcolorful{p}{)}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{make\PYGcolorfulZhy{}surface} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{n+nv}{x} \PYGcolorful{n+nv}{y} \PYGcolorful{n+nv}{w} \PYGcolorful{n+nv}{h} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{surf} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{new} \PYGcolorful{n+nv}{surface}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{pixels} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{alloc} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{*} \PYGcolorful{l+m+mi}{2} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{*} \PYGcolorful{n+nv}{w} \PYGcolorful{n+nv}{h}\PYGcolorful{p}{))))}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{x} \PYGcolorful{n+nv}{x}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{y} \PYGcolorful{n+nv}{y}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{width} \PYGcolorful{n+nv}{w}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{height} \PYGcolorful{n+nv}{h}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{surf} \PYGcolorful{n+nv}{pitch} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{shl} \PYGcolorful{n+nv}{w} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))}
+  \PYGcolorful{n+nv}{surf}
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{c+c1}{;(add\PYGcolorfulZhy{}task repl\PYGcolorfulZhy{}task (repl\PYGcolorfulZhy{}make 1 432 32 200 300))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{spawn\PYGcolorfulZhy{}editor} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{n+nv}{x} \PYGcolorful{n+nv}{y} \PYGcolorful{n+nv}{title} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}editor} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{new} \PYGcolorful{n+nv}{editor}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}editor\PYGcolorfulZhy{}task} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{new} \PYGcolorful{n+nv}{task}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}editor\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{id} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}editor\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{name} \PYGcolorful{n+nv}{title}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}editor} \PYGcolorful{n+nv}{buffer} \PYGcolorful{l+s}{\PYGcolorfulZdq{} \PYGcolorfulZdq{}}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}editor\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{focused} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}editor\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{surface} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{make\PYGcolorfulZhy{}surface} \PYGcolorful{n+nv}{x} \PYGcolorful{n+nv}{y} \PYGcolorful{l+m+mi}{400} \PYGcolorful{l+m+mi}{240}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{add\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{editor\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}editor\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}editor}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{mask\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))}
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{spawn\PYGcolorfulZhy{}repl} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{n+nv}{x} \PYGcolorful{n+nv}{y} \PYGcolorful{n+nv}{title} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}repl} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{new} \PYGcolorful{n+nv}{repl}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}task} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{new} \PYGcolorful{n+nv}{task}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{id} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{name} \PYGcolorful{n+nv}{title}\PYGcolorful{p}{)}
+  \PYGcolorful{c+c1}{;(sput my\PYGcolorfulZhy{}repl buffer \PYGcolorfulZdq{} \PYGcolorfulZdq{})}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{focused} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{surface} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{make\PYGcolorfulZhy{}surface} \PYGcolorful{n+nv}{x} \PYGcolorful{n+nv}{y} \PYGcolorful{l+m+mi}{400} \PYGcolorful{l+m+mi}{240}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{s} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{surface}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{boxfill} \PYGcolorful{n+nv}{s} \PYGcolorful{l+m+mi}{0} \PYGcolorful{l+m+mi}{0} \PYGcolorful{l+m+mi}{400} \PYGcolorful{l+m+mi}{240} \PYGcolorful{n+nv}{0xffff}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{redrawn} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{add\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{repl\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{my\PYGcolorfulZhy{}repl}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{mask\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))}
+
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{spawn\PYGcolorfulZhy{}editor} \PYGcolorful{l+m+mi}{32} \PYGcolorful{l+m+mi}{32} \PYGcolorful{l+s}{\PYGcolorfulZdq{}editor               \PYGcolorfulZdq{}}\PYGcolorful{p}{)}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{spawn\PYGcolorfulZhy{}repl} \PYGcolorful{l+m+mi}{32} \PYGcolorful{l+m+mi}{300} \PYGcolorful{l+s}{\PYGcolorfulZdq{}repl               \PYGcolorfulZdq{}}\PYGcolorful{p}{)}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}task} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{new} \PYGcolorful{n+nv}{task}\PYGcolorful{p}{))}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{id} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{name} \PYGcolorful{l+s}{\PYGcolorfulZdq{}mouse\PYGcolorfulZdq{}}\PYGcolorful{p}{)}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{add\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}func} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}task} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{desktop\PYGcolorfulZhy{}task} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{new} \PYGcolorful{n+nv}{task}\PYGcolorful{p}{))}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{desktop\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{id} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{desktop\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{name} \PYGcolorful{l+s}{\PYGcolorfulZdq{}desktop\PYGcolorfulZdq{}}\PYGcolorful{p}{)}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{desktop\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{redrawn} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{add\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{desktop\PYGcolorfulZhy{}func} \PYGcolorful{n+nv}{desktop\PYGcolorfulZhy{}task} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{launched} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{launcher\PYGcolorfulZhy{}func} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{p}{(}\PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{task}\PYGcolorful{p}{)} \PYGcolorful{n+nv}{dummy} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{let} \PYGcolorful{n+nv}{f} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{sget} \PYGcolorful{n+no}{t} \PYGcolorful{n+nv}{focused}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{*} \PYGcolorful{n+nv}{f} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{*} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{not} \PYGcolorful{n+nv}{launched}\PYGcolorful{p}{)} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}btn}\PYGcolorful{p}{))} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+    \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{launched} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)}
+    \PYGcolorful{p}{(}\PYGcolorful{n+nv}{spawn\PYGcolorfulZhy{}editor} \PYGcolorful{l+m+mi}{100} \PYGcolorful{l+m+mi}{100} \PYGcolorful{l+s}{\PYGcolorfulZdq{}new editor\PYGcolorfulZdq{}}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{not} \PYGcolorful{n+nv}{mouse\PYGcolorfulZhy{}btn}\PYGcolorful{p}{)} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{launched} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{l+m+mi}{0}
+\PYGcolorful{p}{)))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{launcher\PYGcolorfulZhy{}task} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{new} \PYGcolorful{n+nv}{task}\PYGcolorful{p}{))}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{launcher\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{id} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{max\PYGcolorfulZhy{}task\PYGcolorfulZhy{}id} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{))}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{launcher\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{name} \PYGcolorful{l+s}{\PYGcolorfulZdq{}icon\PYGcolorfulZdq{}}\PYGcolorful{p}{)}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{launcher\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{surface} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{make\PYGcolorfulZhy{}surface} \PYGcolorful{l+m+mi}{0} \PYGcolorful{l+m+mi}{0} \PYGcolorful{l+m+mi}{32} \PYGcolorful{l+m+mi}{32}\PYGcolorful{p}{))}
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{sput} \PYGcolorful{n+nv}{launcher\PYGcolorfulZhy{}task} \PYGcolorful{n+nv}{redrawn} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)}
+\PYGcolorful{c+c1}{;(add\PYGcolorfulZhy{}task launcher\PYGcolorfulZhy{}func launcher\PYGcolorfulZhy{}task 0)}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{frames} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)} \PYGcolorful{c+c1}{; @added}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{main} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{fn} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{while} \PYGcolorful{l+m+mi}{1} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{do}
+  \PYGcolorful{c+c1}{;(clear)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{run\PYGcolorfulZhy{}tasks}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{send} \PYGcolorful{n+nv}{screen} \PYGcolorful{l+m+mi}{0}\PYGcolorful{p}{)}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{cursor\PYGcolorfulZhy{}blink} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{\PYGcolorfulZpc{}} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{cursor\PYGcolorfulZhy{}blink} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{n+nv}{cursor\PYGcolorfulZhy{}blink\PYGcolorfulZhy{}delay}\PYGcolorful{p}{))}
+  \PYGcolorful{p}{(}\PYGcolorful{k}{if} \PYGcolorful{n+nv}{frames} \PYGcolorful{l+m+mi}{0} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{print} \PYGcolorful{l+s}{\PYGcolorfulZdq{}60 frames\PYGcolorfulZdq{}}\PYGcolorful{p}{))} \PYGcolorful{c+c1}{; @added}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{def} \PYGcolorful{n+nv}{frames} \PYGcolorful{p}{(}\PYGcolorful{n+nv}{\PYGcolorfulZpc{}} \PYGcolorful{p}{(}\PYGcolorful{n+nb}{+} \PYGcolorful{n+nv}{frames} \PYGcolorful{l+m+mi}{1}\PYGcolorful{p}{)} \PYGcolorful{l+m+mi}{60}\PYGcolorful{p}{))}\PYGcolorful{c+c1}{;  @added}
+  \PYGcolorful{p}{(}\PYGcolorful{n+nv}{gc\PYGcolorfulZhy{}if\PYGcolorfulZhy{}needed}\PYGcolorful{p}{)} \PYGcolorful{c+c1}{; @gc \PYGcolorfulZhy{}\PYGcolorfulZgt{} gc\PYGcolorfulZhy{}if\PYGcolorfulZhy{}needed}
+\PYGcolorful{p}{))))}
+
+\PYGcolorful{p}{(}\PYGcolorful{n+nv}{main}\PYGcolorful{p}{)}
+\PYGcolorful{p}{)}
+\end{Verbatim}
