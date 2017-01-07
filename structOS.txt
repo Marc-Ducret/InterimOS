@@ -1,0 +1,29 @@
+Slide stucture du système d'exploitation :
+
+-> Primitives en C comme : changer la couleur d'un pixel, lancer le GC...
+-> Gestion des fenêtres : maintient d'une liste de tasks chacune représentant une fenêtre
+-> Tentitive de ne pas tout dessiner à chaque cycle pour ne recalculer uniquement les pixels qui sont modifiés
+	Mais le résultat est décevant, souvent certains pixels ne sont pas mis à jour mais devraient l'être
+-> Les entrées/sorties du point de vue de l'OS sont toutes représentées par des "Filesystems" (souris, clavier, réseau, disque dur, écran)
+	Ceci permet une certaine abstraction pour la gestion de ceux-ci.
+	exemple : (load "/framebuffer/width")
+
+Slide améliorations :
+
+Opti GC: les figures du rapport et on expliquera à l'oral je pense
+(montrer que l'on a écrit un peu de code lol)
+
+Corection du rendu du "fond d'écran"
+	Auparavant : dessin une seule fois au début
+	Modification : utlisation d'une Task pour le redessiner "si besoin"
+
+
+Amélioration à faire :
+Optimisation du rendu
+	La vitesse de rendu est lente même lorsque que seulement certaines parties sont redessinées
+	Lorsque l'on veut un rendu correct et qu'il faut alors tout dessiner, les performances
+	deviennent catastrophiques.
+	
+	Problème : Les pixels sont nombreux sur l'écran, et pour chacun, le mettre à jour induit un
+	overhead lié à l'interfaçage entre Minilisp et C. Des primitives permettant de remplir des
+	zones entières pourraient être une optimisation conséquente.
